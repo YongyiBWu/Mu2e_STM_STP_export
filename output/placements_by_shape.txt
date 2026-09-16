@@ -1,0 +1,523 @@
+==============================================================================
+shape 0   BOX       LeadBrick2x4x16PV          406.4 x 101.6 x 50.8 mm
+   material granite gray (G4_Pb?)   20 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   0      AI-129669-A_1          -33.696     103.313    -280.683      x->x y->z z->-y
+   7      AI-129842-A_1         -579.015     -32.245     183.274      x->y y->x z->-z
+   16     AI-129762-A_1          -33.696     103.313    -179.083      x->x y->z z->-y
+   32     AI-129611-A_1         -120.928    -101.466       30.95      x->-x y->y z->-z
+   34     AI-129616-A_1         -120.928     101.734       30.95      x->-x y->y z->-z
+   37     AI-129635-A_1         -120.928     203.334      107.35      x->-x y->y z->-z
+   39     AI-129636-A_1           82.272     101.734      107.55      x->-x y->y z->-z
+   40     AI-129761-A_1           82.272    -101.466      107.55      x->-x y->y z->-z
+   45     AI-129647-A_1           82.272     203.334       30.95      x->-x y->y z->-z
+   57     AI-129686-A_1          -45.234     -184.94      260.35      x->x y->-z z->y
+   99     AI-129778-A_1          -45.179     -108.74      260.35      x->x y->-z z->y
+   109    AI-129700-A_1          -33.733      52.513    -280.683      x->x y->z z->-y
+   129    AI-129713-A_1          -33.733     -49.087    -280.683      x->x y->z z->-y
+   138    AI-129654-A_1          -33.733      52.513    -179.083      x->x y->z z->-y
+   177    AI-129656-A_1           -33.77     -99.887    -280.683      x->x y->z z->-y
+   193    AI-129776-A_1         -120.928     101.734      183.35      x->-x y->y z->-z
+   194    AI-129782-A_1         -120.928    -101.466      183.35      x->-x y->y z->-z
+   195    AI-129664-A_1          -33.733     -49.087    -179.083      x->x y->z z->-y
+   203    AI-129816-A_1           -33.77     -99.887    -179.083      x->x y->z z->-y
+   208    AI-129839-A_1           82.272     203.334      183.35      x->-x y->y z->-z
+
+==============================================================================
+shape 1   BOX       LeadBrick2x4x8PV           203.2 x 101.6 x 50.8 mm
+   material granite gray (G4_Pb?)   146 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   1      AI-129804-A_1         -604.922     114.054      539.75      x->-x y->-z z->-y
+   2      AI-129678-A_1          -760.72    -184.347     514.327      x->-z y->y z->x
+   3      AI-129814-A_1          158.278     113.611      311.15      x->-z y->x z->-y
+   4      AI-129818-A_1         -731.615     120.155     183.164      x->x y->y z->z
+   5      AI-129683-A_1          -682.52    -184.404     717.527      x->-z y->y z->x
+   8      AI-129706-A_1          -169.46       1.713    -280.683      x->-x y->z z->y
+   10     AI-129711-A_1         -682.373      18.796     514.327      x->-z y->y z->x
+   11     AI-129714-A_1         -197.722     113.759      666.75      x->-x y->-z z->-y
+   12     AI-129726-A_1         -682.373      18.796     311.127      x->-z y->y z->x
+   14     AI-129739-A_1            5.878     113.611      463.55      x->-x y->-z z->-y
+   15     AI-129629-A_1         -118.616     -23.478    -356.883      x->-y y->-x z->-z
+   17     AI-129639-A_1         -760.499     120.453     514.327      x->-z y->y z->x
+   19     AI-129661-A_1         -426.415     120.155     183.164      x->x y->y z->z
+   20     AI-129802-A_1         -682.446     -82.804     514.327      x->-z y->y z->x
+   21     AI-129807-A_1         -197.722     113.759      260.35      x->-x y->-z z->-y
+   22     AI-129812-A_1         -349.715    -184.645     261.364      x->x y->y z->z
+   25     AI-129694-A_1         -760.646     -82.747     717.527      x->-z y->y z->x
+   26     AI-129699-A_1         -349.715     -83.045     261.364      x->x y->y z->z
+   27     AI-129841-A_1            5.878     113.611      768.35      x->-x y->-z z->-y
+   30     AI-129719-A_1         -760.573      18.853     514.327      x->-z y->y z->x
+   31     AI-129606-A_1            5.878     113.611      666.75      x->-x y->-z z->-y
+   33     AI-129732-A_1         -553.979    -108.445      748.35      x->-x y->-z z->-y
+   35     AI-129736-A_1         -350.379    -108.593      646.75      x->-x y->-z z->-y
+   36     AI-129620-A_1         -553.979    -108.445      646.75      x->-x y->-z z->-y
+   38     AI-129758-A_1         -350.379    -108.593      545.15      x->-x y->-z z->-y
+   41     AI-129638-A_1         -553.979    -108.445      545.15      x->-x y->-z z->-y
+   42     AI-129764-A_1         -350.379    -108.593      443.55      x->-x y->-z z->-y
+   44     AI-129768-A_1         -553.979    -108.445      443.55      x->-x y->-z z->-y
+   46     AI-129771-A_1         -350.379    -108.593      341.95      x->-x y->-z z->-y
+   48     AI-129659-A_1         -299.634    -184.719      392.75      x->z y->-x z->-y
+   49     AI-129789-A_1         -197.634    -185.014      412.75      x->z y->-x z->-y
+   50     AI-129660-A_1         -222.528     203.334       30.95      x->x y->y z->z
+   51     AI-129792-A_1         -554.034    -184.645      748.35      x->-x y->-z z->-y
+   52     AI-129663-A_1         -222.528       0.134       30.95      x->x y->y z->z
+   53     AI-129794-A_1          183.872     101.734       30.95      x->x y->y z->z
+   54     AI-129665-A_1           56.766    -185.088      768.35      x->-x y->-z z->-y
+   55     AI-129798-A_1          183.872    -101.466       30.95      x->x y->y z->z
+   56     AI-129670-A_1         -350.434    -184.793      748.35      x->-x y->-z z->-y
+   58     AI-129822-A_1         -222.528     101.734      107.55      x->x y->y z->z
+   59     AI-129687-A_1         -222.528    -101.466      107.55      x->x y->y z->z
+   60     AI-129824-A_1         -452.034    -184.719      443.55      x->-x y->-z z->-y
+   61     AI-129689-A_1         -452.034    -184.719      341.95      x->x y->z z->-y
+   62     AI-129827-A_1          183.872     203.334      107.55      x->x y->y z->z
+   63     AI-129692-A_1         -146.834     -184.94      768.35      x->-x y->-z z->-y
+   64     AI-129833-A_1          183.872       0.134      107.55      x->x y->y z->z
+   65     AI-129697-A_1          107.166     -184.94      412.75      x->z y->-x z->-y
+   66     AI-129838-A_1          -45.234     -184.94      463.55      x->-x y->-z z->-y
+   72     AI-129780-A_1          260.195      18.112      717.55      x->z y->y z->-x
+   73     AI-129657-A_1          260.195      18.112      514.35      x->z y->y z->-x
+   74     AI-129784-A_1          260.195      18.112      311.15      x->z y->y z->-x
+   76     AI-129666-A_1          183.895      18.167      311.15      x->z y->y z->-x
+   77     AI-129799-A_1          183.895      18.167      717.55      x->z y->y z->-x
+   78     AI-129850-A_1         -452.034    -184.719      545.15      x->x y->z z->-y
+   79     AI-129715-A_1         -452.034    -184.719      646.75      x->-x y->-z z->-y
+   80     AI-129721-A_1         -299.634    -184.719      595.95      x->z y->-x z->-y
+   81     AI-129609-A_1          -45.234     -184.94      666.75      x->-x y->-z z->-y
+   82     AI-129727-A_1          -45.234    -185.014      565.15      x->-x y->-z z->-y
+   83     AI-129612-A_1          107.166     -184.94      615.95      x->z y->-x z->-y
+   84     AI-129733-A_1         -197.634    -185.014      615.95      x->z y->-x z->-y
+   85     AI-129618-A_1         -553.579    -108.445      341.95      x->-x y->-z z->-y
+   86     AI-129740-A_1         -604.434    -184.719      392.75      x->-z y->x z->-y
+   89     AI-129630-A_1           56.821    -108.888      768.35      x->-x y->-z z->-y
+   90     AI-129637-A_1           56.821    -108.888      666.75      x->-x y->-z z->-y
+   91     AI-129763-A_1           56.821    -108.888      565.15      x->-x y->-z z->-y
+   92     AI-129640-A_1           56.821    -108.888      463.55      x->-x y->-z z->-y
+   93     AI-129767-A_1           56.821    -108.888      361.95      x->-x y->-z z->-y
+   94     AI-129645-A_1         -146.779     -108.74      768.35      x->-x y->-z z->-y
+   95     AI-129770-A_1         -146.779     -108.74      666.75      x->-x y->-z z->-y
+   96     AI-129650-A_1         -146.779     -108.74      565.15      x->-x y->-z z->-y
+   97     AI-129774-A_1         -146.779     -108.74      463.55      x->-x y->-z z->-y
+   98     AI-129653-A_1         -146.779     -108.74      361.95      x->-x y->-z z->-y
+   100    AI-129790-A_1         -350.379    -108.593      748.35      x->-x y->-z z->-y
+   102    AI-129797-A_1         -552.915     -83.045     261.364      x->x y->y z->z
+   103    AI-129675-A_1         -401.322     113.907      336.55      x->-x y->-z z->-y
+   104    AI-129688-A_1         -604.922     114.054      438.15      x->-x y->-z z->-y
+   105    AI-129826-A_1          -760.72    -184.347     717.527      x->-z y->y z->x
+   106    AI-129691-A_1         -760.646     -82.747     311.127      x->-z y->y z->x
+   107    AI-129831-A_1         -604.922     114.054      336.55      x->-x y->-z z->-y
+   110    AI-129705-A_1          118.667       1.713    -229.883      x->-z y->-x z->y
+   112    AI-129720-A_1         -760.573      18.853     717.527      x->-z y->y z->x
+   113    AI-129607-A_1         -197.722     113.759      768.35      x->-x y->-z z->-y
+   114    AI-129725-A_1         -401.322     113.907      539.75      x->-x y->-z z->-y
+   115    AI-129617-A_1         -731.615    -184.645     183.164      x->x y->y z->z
+   116    AI-129759-A_1          -760.72    -184.347     311.127      x->-z y->y z->x
+   119    AI-129808-A_1          158.278     113.463      717.55      x->-z y->x z->-y
+   120    AI-129677-A_1         -604.922     114.054      641.35      x->-x y->-z z->-y
+   121    AI-129813-A_1          -682.52    -184.404     311.127      x->-z y->y z->x
+   122    AI-129681-A_1         -426.415     -83.045     183.164      x->x y->y z->z
+   123    AI-129817-A_1         -731.615      18.555     183.164      x->x y->y z->z
+   125    AI-129820-A_1          158.278     113.611      514.35      x->-z y->x z->-y
+   126    AI-129704-A_1          -682.52    -184.404     514.327      x->-z y->y z->x
+   127    AI-129844-A_1         -604.522     139.307      260.35      x->-x y->-y z->z
+   128    AI-129849-A_1         -197.722     113.759      463.55      x->-x y->-z z->-y
+   130    AI-129716-A_1         -426.415      18.555     183.164      x->x y->y z->z
+   131    AI-129738-A_1         -682.373      18.796     717.527      x->-z y->y z->x
+   132    AI-129622-A_1            5.878     113.611      260.35      x->-x y->-z z->-y
+   133    AI-129744-A_1         -760.499     120.453     311.127      x->-z y->y z->x
+   134    AI-129749-A_1         -401.322     113.907      438.15      x->-x y->-z z->-y
+   136    AI-129643-A_1         -682.446     -82.804     717.527      x->-z y->y z->x
+   137    AI-129649-A_1            5.878     113.611      565.15      x->-x y->-z z->-y
+   139    AI-129785-A_1          118.704      -23.65    -356.883      x->-y y->-x z->-z
+   140    AI-129796-A_1         -760.499     120.453     717.527      x->-z y->y z->x
+   141    AI-129801-A_1         -552.915    -184.645     261.364      x->x y->y z->z
+   144    AI-129811-A_1         -197.722     113.759      565.15      x->-x y->-z z->-y
+   146    AI-129682-A_1         -552.915      18.555     261.364      x->x y->y z->z
+   147    AI-129840-A_1         -604.922     114.054      742.95      x->-x y->-z z->-y
+   148    AI-129703-A_1         -682.446     -82.804     311.127      x->-z y->y z->x
+   149    AI-129843-A_1            5.878     113.611      361.95      x->-x y->-z z->-y
+   150    AI-129847-A_1          -169.46       1.713    -179.083      x->-x y->z z->y
+   153    AI-129729-A_1          -45.234    -185.014      361.95      x->-x y->-z z->-y
+   154    AI-129614-A_1         -604.434    -184.719      595.95      x->-z y->x z->-y
+   155    AI-129735-A_1          183.895      18.167      514.35      x->z y->y z->-x
+   160    AI-129791-A_1         -731.615     -83.045     183.164      x->x y->y z->z
+   166    AI-129623-A_1         -158.968      43.521     769.032      x->-x y->-z z->-y
+   167    AI-129745-A_1         -158.968     -32.679     794.432      x->-x y->y z->-z
+   169    AI-129751-A_1         -158.968     -32.679     743.632      x->-x y->y z->-z
+   171    AI-129753-A_1         -147.171      18.121      628.43      
+   172    AI-129754-A_1         -165.131     -58.088     610.469      
+   174    AI-129651-A_1         -197.722     113.759      361.95      x->-x y->-z z->-y
+   176    AI-129779-A_1         -183.092      18.121     592.509      
+   181    AI-129680-A_1         -349.715      18.555     261.364      x->x y->y z->z
+   184    AI-129737-A_1          260.269     119.712      311.15      x->z y->y z->-x
+   185    AI-129621-A_1         -401.322     113.907      641.35      x->-x y->-z z->-y
+   186    AI-129743-A_1          260.269     119.712      514.35      x->z y->y z->-x
+   187    AI-129628-A_1          260.269     119.712      717.55      x->z y->y z->-x
+   191    AI-129769-A_1         -760.646     -82.747     514.327      x->-z y->y z->x
+   192    AI-129772-A_1         -401.322     139.307      260.35      x->-x y->y z->-z
+   196    AI-129795-A_1          183.821     -83.433      717.55      x->z y->y z->-x
+   197    AI-129667-A_1          183.872     101.734      183.35      x->x y->y z->z
+   198    AI-129800-A_1          260.121     -83.488      514.35      x->z y->y z->-x
+   199    AI-129805-A_1          260.121     -83.488      311.15      x->z y->y z->-x
+   201    AI-129810-A_1          183.872    -101.466      183.35      x->x y->y z->z
+   202    AI-129679-A_1          260.047    -185.088      717.55      x->z y->y z->-x
+   204    AI-129828-A_1          183.747    -185.033      311.15      x->z y->y z->-x
+   205    AI-129693-A_1          183.747    -185.033      717.55      x->z y->y z->-x
+   207    AI-129698-A_1         -426.415    -184.645     183.164      x->x y->y z->z
+   209    AI-129702-A_1         -222.528     203.334      183.35      x->x y->y z->z
+   211    AI-129707-A_1         -222.528       0.134      183.35      x->x y->y z->z
+   212    AI-129845-A_1          260.321     -83.488      717.55      x->z y->y z->-x
+   213    AI-129712-A_1          260.047    -185.088      514.35      x->z y->y z->-x
+   214    AI-129718-A_1          183.821     -83.433      311.15      x->z y->y z->-x
+   216    AI-129610-A_1          183.747    -185.033      514.35      x->z y->y z->-x
+   217    AI-129728-A_1         -760.573      18.853     311.127      x->-z y->y z->x
+   218    AI-129613-A_1          183.821     -83.433      514.35      x->z y->y z->-x
+   219    AI-129734-A_1         -401.322     113.907      742.95      x->-x y->-z z->-y
+   221    AI-129742-A_1          260.047    -185.088      311.15      x->z y->y z->-x
+
+==============================================================================
+shape 2   BOX_HOLE  SteelBkwall2PV             914.6 x 317.5 x 19.05 mm
+   material medium steel (RackSteel?)   2 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   6      AI-129701-A_1         -248.276      78.503       368.3  4   x->-x y->z z->y
+   108    AI-129836-A_1         -248.276      78.503       685.8  4   x->-x y->z z->y
+
+==============================================================================
+shape 3   PRISM     CopperBkwall3PV            cap 8826.171 mm^2 swept 150.4 mm
+   material medium maroon (G4_Cu?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   9      AI-129788-A_1         -639.873      -8.268     722.656      x->x y->z z->-y
+
+==============================================================================
+shape 4   BOX       BPFwall4PV                 481.2 x 406.2 x 25.4 mm
+   material strong ice (BP?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   13     AI-129615-A_1         -590.715     -32.317      144.99      x->-x y->-y z->z
+
+==============================================================================
+shape 5   BOX       SteelBrick1x6x24PV         609.6 x 152.4 x 25.4 mm
+   material medium steel (RackSteel?)   4 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   18     AI-129655-A_1          -798.72      95.028     514.995      x->z y->-y z->x
+   23     AI-129825-A_1         -722.203      94.986     514.995      x->z y->-y z->x
+   117    AI-129766-A_1          222.079       94.32     514.995      x->z y->-y z->x
+   118    AI-129644-A_1          298.432        94.3     514.995      x->z y->-y z->x
+
+==============================================================================
+shape 6   BOX       SteelFwall6PV              152.4 x 55.88 x 50.8 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   24     AI-129690-A_1           -39.92       1.713    -306.083      x->-z y->x z->-y
+
+==============================================================================
+shape 7   BOX       AluminumBkwall7PV          1435.1 x 927.1 x 25.4 mm
+   material silver gray (G4_Al?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   28     AI-129717-A_1         -327.006    -248.577       355.6      x->-x y->z z->y
+
+==============================================================================
+shape 8   BOX_HOLE  TungstenFwall8PV           162.56 x 101.6 x 81.28 mm
+   material powder gray (G4_W?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   29     AI-129832-A_1           -0.035      -0.515       -50.8  4   x->x y->-z z->y
+
+==============================================================================
+shape 9   BOX_HOLE  LeadFwall9PV               406.4 x 101.6 x 50.8 mm
+   material granite gray (G4_Pb?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   43     AI-129641-A_1         -120.928       0.134      107.35  2   x->-x y->y z->-z
+
+==============================================================================
+shape 10  BOX       SteelBrick3x6x8PV          203.2 x 152.4 x 83.6 mm
+   material medium steel (RackSteel?)   4 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   47     AI-129787-A_1          209.272    -194.066      107.15      x->-z y->-x z->y
+   188    AI-129748-A_1         -247.928    -193.734      107.15      x->-z y->-x z->y
+   189    AI-129765-A_1          -95.528    -193.844      107.15      x->-z y->-x z->y
+   190    AI-129642-A_1           56.872    -193.955      107.15      x->-z y->-x z->y
+
+==============================================================================
+shape 11  BOX_HOLE  PolyFwall11PV              609.612 x 187.482 x 25.4 mm
+   material medium ice (Polyethylene?)   2 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   67     AI-129604-A_1          -19.309     -58.625       69.25  2   x->-x y->-y z->z
+   69     AI-129658-A_1          -19.309     -58.625      145.25  2   x->-x y->-y z->z
+
+==============================================================================
+shape 12  BOX       PolyFwall12PV              609.612 x 218.918 x 25.4 mm
+   material medium ice (Polyethylene?)   2 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   68     AI-129755-A_1          -19.309     144.675       69.25      x->x y->-y z->-z
+   70     AI-129821-A_1          -19.309     144.675      145.25      x->x y->-y z->-z
+
+==============================================================================
+shape 13  PRISM     BPFwall13PV                cap 255407.671 mm^2 swept 25.4 mm
+   material strong ice (BP?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   71     AI-129830-A_1          298.432     254.124      209.55      x->-y y->-z z->x
+
+==============================================================================
+shape 14  BOX       CopperBkwall14PV           596.9 x 150.4 x 12.7 mm
+   material medium maroon (G4_Cu?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   75     AI-129786-A_1          152.182      -8.288       520.7      x->-z y->-y z->-x
+
+==============================================================================
+shape 15  PRISM     BPFwall15PV                cap 463769.856 mm^2 swept 25.4 mm
+   material strong ice (BP?)   2 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   87     AI-129803-A_1         -245.189    -146.988      288.75      x->x y->z z->-y
+   88     AI-129619-A_1         -245.189    -223.188      288.75      x->x y->z z->-y
+
+==============================================================================
+shape 16  BOX       BPFwall16PV                407.8 x 302.8 x 25.4 mm
+   material strong ice (BP?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   101    AI-129708-A_1         -452.015     -84.017     222.152      x->-x y->-y z->z
+
+==============================================================================
+shape 17  BOX       CopperBkwall17PV           137.7 x 111.2 x 12.7 mm
+   material medium maroon (G4_Cu?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   111    AI-129731-A_1         -649.889      -1.956     763.527      x->-y y->-z z->x
+
+==============================================================================
+shape 18  BOX_HOLE  SteelFwall18PV             391.2 x 238.8 x 221.2 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   124    AI-129819-A_1          -18.927     -14.662    -524.169  1   x->-x y->z z->y
+
+==============================================================================
+shape 19  PRISM     SteelRwall19PV             cap 2903.22 mm^2 swept 152.4 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   135    AI-129631-A_1         -248.115      -6.863     286.745      x->-x y->z z->y
+
+==============================================================================
+shape 20  BOX       SteelFwall20PV             406.4 x 101.6 x 25.4 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   142    AI-129671-A_1         -502.922     139.307      222.25      x->-x y->-y z->z
+
+==============================================================================
+shape 21  BOX       BPBrick1x10x24PV           609.6 x 253.9 x 25.4 mm
+   material strong ice (BP?)   3 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   143    AI-129730-A_1         -721.694    -108.198     514.327      x->z y->y z->-x
+   145    AI-129793-A_1         -798.894    -108.142     514.327      x->z y->y z->-x
+   210    AI-129668-A_1          222.032    -108.883      514.35      x->-z y->y z->x
+
+==============================================================================
+shape 22  PRISM     CopperBkwall22PV           cap 70623.57 mm^2 swept 12.7 mm
+   material medium maroon (G4_Cu?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   151    AI-129634-A_1          -57.289     -77.118      819.15      x->-x y->-z z->-y
+
+==============================================================================
+shape 23  PRISM     CopperFwall23PV            cap 199799.575 mm^2 swept 12.7 mm
+   material medium maroon (G4_Cu?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   152    AI-129777-A_1         -126.763     -77.118      209.55      x->-x y->z z->y
+
+==============================================================================
+shape 24  BOX_HOLE  CopperBkwall24PV           150.526 x 137.809 x 12.7 mm
+   material medium maroon (G4_Cu?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   156    AI-129806-A_1           68.619      -1.938     373.714  1   
+
+==============================================================================
+shape 25  TUBE      SteelTube25PV              50.8 x 50.8 x 489.1 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   157    AI-129625-A_1            40.39       0.332       249.8      
+
+==============================================================================
+shape 26  PRISM     LeadBkwall26PV             cap 19354.8 mm^2 swept 23.4 mm
+   material granite gray (G4_Pb?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   158    AI-129746-A_1          145.919      55.221     380.064      x->x y->-z z->y
+
+==============================================================================
+shape 27  PRISM     CopperRwall27PV            cap 2334.895 mm^2 swept 137.7 mm
+   material medium maroon (G4_Cu?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   159    AI-129846-A_1         -273.411      -1.929     628.947      x->x y->-z z->y
+
+==============================================================================
+shape 28  PRISM     SteelBwall28PV             cap 5161.28 mm^2 swept 152.4 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   161    AI-129672-A_1          -129.21      -7.279     502.706      x->z y->x z->y
+
+==============================================================================
+shape 29  BOX_HOLE  LeadBkwall29PV             203.274 x 101.747 x 50.8 mm
+   material granite gray (G4_Pb?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   162    AI-129835-A_1           44.213      -7.279     405.464  1   
+
+==============================================================================
+shape 30  BOX       AluminumFwall30PV          273.187 x 110.3 x 19.05 mm
+   material silver gray (G4_Al?)   2 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   163    AI-129633-A_1         -100.902     -86.282       -50.8      x->y y->-z z->-x
+   164    AI-129684-A_1          100.708     -86.541       -50.8      x->y y->-z z->-x
+
+==============================================================================
+shape 31  PRISM     LeadBkwall31PV             cap 19354.8 mm^2 swept 25.4 mm
+   material granite gray (G4_Pb?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   165    AI-129741-A_1          145.832     -70.779     380.064      x->x y->-z z->y
+
+==============================================================================
+shape 32  BOX_HOLE  AluminumFwall32PV          182.56 x 110.3 x 19.05 mm
+   material silver gray (G4_Al?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   168    AI-129757-A_1           -0.113      -60.68       -50.8  3   x->-x y->-z z->-y
+
+==============================================================================
+shape 33  BOX       AluminumFwall33PV          220.66 x 110.3 x 12.7 mm
+   material silver gray (G4_Al?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   170    AI-129676-A_1           -0.201    -229.411       -50.8      x->-x y->z z->y
+
+==============================================================================
+shape 34  BOX       SteelFwall34PV             220.672 x 110.3 x 19.05 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   173    AI-129632-A_1            0.003       59.65       -50.8      x->-x y->-z z->-y
+
+==============================================================================
+shape 35  BOX_HOLE  LeadBkwall35PV             203.2 x 101.6 x 50.8 mm
+   material granite gray (G4_Pb?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   175    AI-129775-A_1           44.213      -7.279     456.264  1   x->-x y->y z->-z
+
+==============================================================================
+shape 36  PRISM     CopperBkwall36PV           cap 4859.24 mm^2 swept 137.7 mm
+   material medium maroon (G4_Cu?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   178    AI-129781-A_1         -273.411      -1.929     628.947      x->x y->-z z->y
+
+==============================================================================
+shape 37  BOX       CopperBkwall37PV           324.8 x 137.7 x 12.7 mm
+   material medium maroon (G4_Cu?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   179    AI-129673-A_1          -51.018      -1.929     656.764      x->-z y->y z->x
+
+==============================================================================
+shape 38  BOX_HOLE  CopperBkwall38PV           201.075 x 137.7 x 12.7 mm
+   material medium maroon (G4_Cu?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   180    AI-129627-A_1           45.269      -1.938       488.0  1   x->-x y->y z->-z
+
+==============================================================================
+shape 39  BOX       SteelBkwall39PV            609.6 x 504.0 x 25.4 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   182    AI-129709-A_1          -42.771     151.878      514.35      x->-z y->-x z->y
+
+==============================================================================
+shape 40  BOX       SteelBkwall40PV            532.1 x 409.5 x 25.4 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   183    AI-129848-A_1         -500.521     151.878       553.1      x->-z y->x z->-y
+
+==============================================================================
+shape 41  BOX_HOLE  LeadFwall41PV              406.4 x 101.6 x 50.8 mm
+   material granite gray (G4_Pb?)   2 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   200    AI-129674-A_1           82.272       0.134      183.35  2   x->-x y->y z->-z
+   222    AI-129624-A_1           82.272       0.134       30.95  2   x->-x y->y z->-z
+
+==============================================================================
+shape 42  BOX       SteelFwall42PV             490.0 x 152.2 x 25.4 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   206    AI-129834-A_1         -336.828       9.124       81.65      x->y y->-z z->-x
+
+==============================================================================
+shape 43  TUBE      SteelTube43PV              50.8 x 50.8 x 217.0 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   215    AI-129605-A_1          -40.864       0.343      113.75      
+
+==============================================================================
+shape 44  BOX_HOLE  CopperFwall44PV            316.099 x 137.907 x 12.7 mm
+   material medium maroon (G4_Cu?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   220    AI-129752-A_1            0.532      -1.916       215.9  2   
+
+==============================================================================
+shape 45  BOX       SteelFwall45PV             520.0 x 430.0 x 25.4 mm
+   material medium steel (RackSteel?)   1 placement(s)
+
+   solid  part id                      x           y           z  bor orientation
+   223    AI-129852-A_1          -37.657    -137.962    -383.569      x->z y->x z->y
+
+wrote C:\Coding and Repos\Mu2e\Mu2e_STM_STP_export\output\placements_by_shape.csv (224 rows)
+orientations across all 224 solids:
+   x->-x y->-z z->-y            56
+   x->x y->y z->z               26
+   x->-z y->y z->x              23
+   x->z y->y z->-x              23
+   x->-x y->y z->-z             17
+   x->x y->z z->-y              13
+   x->-x y->z z->y              9
+                                8
+   x->-z y->x z->-y             7
+   x->x y->-z z->y              7
+   x->-x y->-y z->z             6
+   x->-z y->-x z->y             6
+   x->z y->-x z->-y             6
+   x->z y->-y z->x              4
+   x->y y->-z z->-x             3
+   x->-y y->-x z->-z            2
+   x->x y->-y z->-z             2
+   x->-y y->-z z->x             2
+   x->z y->x z->y               2
+   x->y y->x z->-z              1
+   x->-z y->-y z->-x            1

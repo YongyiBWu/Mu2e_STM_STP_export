@@ -11,6 +11,12 @@ only from the STEP graph -- face count plus each face's surface type -- is
 independent of coordinates, so it cannot be contaminated by the de-tilt or by
 simplification moving a part slightly.
 
+That coordinate-independence matters more than it first appeared. The tilt is
+piecewise -- 208 of 224 solids carry it, 12 are square (stage 00) -- so any
+method keyed on world coordinates has to know which population a solid belongs
+to. This one does not: counting surface types asks nothing about orientation,
+so it is equally valid for both.
+
 The script prints how many signature classes have identical membership counts on
 the graph side and the kernel side. That agreement is what justifies the
 positional bind used in 05: if the classes line up in size, the n-th member of a

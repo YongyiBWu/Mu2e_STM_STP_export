@@ -20,6 +20,16 @@ rather than hidden -- classes that disagree are skipped, not guessed.
 
 The LUT is keyed on dimensions rounded to whole mm and sorted, which makes it
 orientation-free and tolerant of simplification shifting a dimension slightly.
+
+A caution now that the tilt is known to be PIECEWISE (208 of 224 solids carry
+it, 12 are square -- see stage 00): these keys come from world-aligned bounding
+boxes, so they inherit whatever the solid's orientation and tilt state do to
+that box. Rounding to whole mm absorbs the ~0.3mm a tilt adds to a 50.8 face,
+which is why square and tilted copies of the same brick still share a key. It
+does NOT absorb a genuine rotation: a brick standing on a different end gives a
+different key, as shape 1 shows (143 members on one key, 3 rotated ones on two
+others). That is a limitation of bbox keys, not of the tilt -- the extractor's
+own dedup avoids it by measuring in each solid's own frame.
 Classes that end up with more than one colour are counted as "mixed" and take
 the most common; the real extractor's load_colour_lut() is the descendant of
 this and marks those cases.

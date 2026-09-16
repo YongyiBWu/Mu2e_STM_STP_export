@@ -1,0 +1,202 @@
+reading F10269585--_1-G4 Shield House_2.stp
+  224 solids
+
+pass 1: 679 of 24976 pairs have interpenetrating bounding boxes (0.1s)
+
+pass 2: intersecting the real solids (this is the slow part)
+   200/679 tested, 1s elapsed, 42 overlap(s) so far
+   400/679 tested, 1s elapsed, 107 overlap(s) so far
+   600/679 tested, 2s elapsed, 155 overlap(s) so far
+   679/679 tested in 3s
+
+====================================================================
+178 intersecting pair(s) above 1 mm^3: 1 REAL, 177 contact
+
+solid solid kind       volume mm^3  extent of overlap mm       parts
+39    70    coplanar     16516.096   406.47 x  101.89 x    0.40  LeadBrick2x4x16PV / PolyFwall12PV
+40    69    coplanar     16516.096   406.47 x  101.89 x    0.40  LeadBrick2x4x16PV / PolyFwall11PV
+51    87    skin          9154.137   203.20 x    0.59 x  101.60  LeadBrick2x4x8PV / BPFwall15PV
+33    152   skin          8319.690   200.94 x    0.57 x  101.60  LeadBrick2x4x8PV / CopperFwall23PV
+62    70    coplanar      8258.048   203.27 x  101.75 x    0.40  LeadBrick2x4x8PV / PolyFwall12PV
+37    70    coplanar      8257.783   406.46 x  101.89 x    0.20  LeadBrick2x4x16PV / PolyFwall12PV
+58    70    coplanar      8257.517   203.26 x  101.75 x    0.40  LeadBrick2x4x8PV / PolyFwall12PV
+59    69    coplanar      8249.815   203.07 x  101.75 x    0.40  LeadBrick2x4x8PV / PolyFwall11PV
+80    87    coplanar      7625.519   101.60 x    0.44 x  203.20  LeadBrick2x4x8PV / BPFwall15PV
+48    87    coplanar      7625.519   101.60 x    0.44 x  203.20  LeadBrick2x4x8PV / BPFwall15PV
+78    87    skin          7625.519   203.20 x    0.52 x  101.60  LeadBrick2x4x8PV / BPFwall15PV
+61    87    skin          7625.519   203.20 x    0.52 x  101.60  LeadBrick2x4x8PV / BPFwall15PV
+79    87    skin          7625.519   203.20 x    0.52 x  101.60  LeadBrick2x4x8PV / BPFwall15PV
+60    87    skin          7625.519   203.20 x    0.52 x  101.60  LeadBrick2x4x8PV / BPFwall15PV
+87    154   coplanar      7625.519   101.60 x    0.44 x  203.20  BPFwall15PV / LeadBrick2x4x8PV
+86    87    coplanar      7625.519   101.60 x    0.44 x  203.20  LeadBrick2x4x8PV / BPFwall15PV
+200   201   skin          7306.629   203.20 x    0.86 x   50.80  LeadFwall41PV / LeadBrick2x4x8PV
+194   200   skin          7299.488   203.00 x    0.86 x   50.80  LeadBrick2x4x16PV / LeadFwall41PV
+40    43    skin          7284.975   203.40 x    0.86 x   50.60  LeadBrick2x4x16PV / LeadFwall9PV
+43    59    skin          7270.750   203.00 x    0.86 x   50.60  LeadFwall9PV / LeadBrick2x4x8PV
+55    222   skin          7263.480   203.20 x    0.86 x   50.50  LeadBrick2x4x8PV / LeadFwall41PV
+32    222   skin          7256.381   203.00 x    0.86 x   50.50  LeadBrick2x4x16PV / LeadFwall41PV
+64    69    coplanar      6900.201   203.26 x   85.04 x    0.40  LeadBrick2x4x8PV / PolyFwall11PV
+108   131   skin          6471.579    48.60 x    0.69 x  203.20  SteelBkwall2PV / LeadBrick2x4x8PV
+6     12    skin          6470.829    48.60 x    0.69 x  203.18  SteelBkwall2PV / LeadBrick2x4x8PV
+43    69    coplanar      6145.673   406.46 x   85.90 x    0.20  LeadFwall9PV / PolyFwall11PV
+56    87    coplanar      6102.896   203.20 x    0.44 x  101.60  LeadBrick2x4x8PV / BPFwall15PV
+57    87    coplanar      6065.319   406.40 x    0.44 x  101.60  LeadBrick2x4x16PV / BPFwall15PV
+104   183   coplanar      5663.825   201.95 x    0.42 x  101.60  LeadBrick2x4x8PV / SteelBkwall40PV
+1     183   coplanar      5663.825   201.95 x    0.42 x  101.60  LeadBrick2x4x8PV / SteelBkwall40PV
+120   183   coplanar      5663.825   201.95 x    0.42 x  101.60  LeadBrick2x4x8PV / SteelBkwall40PV
+147   183   coplanar      5663.825   201.95 x    0.42 x  101.60  LeadBrick2x4x8PV / SteelBkwall40PV
+107   183   coplanar      5591.355   201.95 x    0.42 x  100.30  LeadBrick2x4x8PV / SteelBkwall40PV
+38    152   coplanar      5455.165   203.20 x    0.42 x  101.60  LeadBrick2x4x8PV / CopperFwall23PV
+35    152   coplanar      5243.103   203.20 x    0.42 x  101.60  LeadBrick2x4x8PV / CopperFwall23PV
+28    88    skin          5218.138   814.11 x    0.60 x  609.60  AluminumBkwall7PV / BPFwall15PV
+67    188   skin          5101.781   152.20 x    1.43 x   25.40  PolyFwall11PV / SteelBrick3x6x8PV
+69    188   skin          5101.781   152.20 x    1.43 x   25.40  PolyFwall11PV / SteelBrick3x6x8PV
+165   175   real          5100.321   203.03 x    0.64 x   50.80  LeadBkwall31PV / LeadBkwall35PV
+100   152   coplanar      4978.122   178.09 x    0.40 x  101.60  LeadBrick2x4x8PV / CopperFwall23PV
+36    152   skin          4794.541   162.38 x    0.54 x  101.60  LeadBrick2x4x8PV / CopperFwall23PV
+67    189   skin          4680.330   152.40 x    1.32 x   25.40  PolyFwall11PV / SteelBrick3x6x8PV
+69    189   skin          4680.330   152.40 x    1.32 x   25.40  PolyFwall11PV / SteelBrick3x6x8PV
+162   165   skin          4462.236   203.03 x    0.64 x   50.80  LeadBwall29PV / LeadBkwall31PV
+67    190   skin          4252.093   152.40 x    1.21 x   25.40  PolyFwall11PV / SteelBrick3x6x8PV
+69    190   skin          4252.093   152.40 x    1.21 x   25.40  PolyFwall11PV / SteelBrick3x6x8PV
+99    152   coplanar      4183.474   374.19 x    0.40 x  101.60  LeadBrick2x4x16PV / CopperFwall23PV
+6     181   skin          3901.556   203.20 x    0.54 x   50.80  SteelBkwall2PV / LeadBrick2x4x8PV
+6     146   skin          3894.267   203.20 x    0.54 x   50.80  SteelBkwall2PV / LeadBrick2x4x8PV
+47    67    skin          3823.855   152.40 x    1.10 x   25.40  SteelBrick3x6x8PV / PolyFwall11PV
+47    69    skin          3823.855   152.40 x    1.10 x   25.40  SteelBrick3x6x8PV / PolyFwall11PV
+6     10    skin          3641.013    48.60 x    0.69 x  114.32  SteelBkwall2PV / LeadBrick2x4x8PV
+152   220   skin          3278.856   285.29 x    1.12 x   12.70  CopperFwall23PV / CopperBwall44PV
+42    152   coplanar      3130.182   162.78 x    0.39 x  101.60  LeadBrick2x4x8PV / CopperFwall23PV
+66    87    coplanar      3051.655   203.20 x    0.30 x  101.60  LeadBrick2x4x8PV / BPFwall15PV
+81    87    coplanar      3051.655   203.20 x    0.30 x  101.60  LeadBrick2x4x8PV / BPFwall15PV
+63    87    coplanar      3051.655   203.20 x    0.30 x  101.60  LeadBrick2x4x8PV / BPFwall15PV
+83    87    coplanar      3051.655   101.60 x    0.22 x  203.20  LeadBrick2x4x8PV / BPFwall15PV
+65    87    coplanar      3051.655   101.60 x    0.22 x  203.20  LeadBrick2x4x8PV / BPFwall15PV
+10    108   skin          2830.566    48.60 x    0.69 x   88.88  LeadBrick2x4x8PV / SteelBkwall2PV
+183   219   coplanar      2647.662   203.20 x    0.28 x  101.60  SteelBkwall40PV / LeadBrick2x4x8PV
+114   183   coplanar      2647.662   203.20 x    0.28 x  101.60  LeadBrick2x4x8PV / SteelBkwall40PV
+183   185   coplanar      2647.662   203.20 x    0.28 x  101.60  SteelBkwall40PV / LeadBrick2x4x8PV
+134   183   coplanar      2647.662   203.20 x    0.28 x  101.60  LeadBrick2x4x8PV / SteelBkwall40PV
+103   183   coplanar      2613.785   203.20 x    0.28 x  100.30  LeadBrick2x4x8PV / SteelBkwall40PV
+98    152   coplanar      2603.117   203.20 x    0.27 x  101.60  LeadBrick2x4x8PV / CopperFwall23PV
+59    188   coplanar      2569.427   152.40 x    0.44 x   50.80  LeadBrick2x4x8PV / SteelBrick3x6x8PV
+32    188   coplanar      2569.427   152.40 x    0.44 x   50.80  LeadBrick2x4x16PV / SteelBrick3x6x8PV
+188   194   coplanar      2569.427   152.40 x    0.44 x   50.80  SteelBrick3x6x8PV / LeadBrick2x4x16PV
+97    152   coplanar      2039.614   203.20 x    0.27 x  101.60  LeadBrick2x4x8PV / CopperFwall23PV
+210   213   coplanar      1741.512     0.16 x  101.54 x  203.20  BPBrick1x10x24PV / LeadBrick2x4x8PV
+202   210   coplanar      1741.512     0.16 x  101.54 x  203.20  LeadBrick2x4x8PV / BPBrick1x10x24PV
+210   221   coplanar      1741.512     0.16 x  101.54 x  203.20  BPBrick1x10x24PV / LeadBrick2x4x8PV
+32    189   coplanar      1712.951   152.40 x    0.33 x   50.80  LeadBrick2x4x16PV / SteelBrick3x6x8PV
+189   194   coplanar      1712.951   152.40 x    0.33 x   50.80  SteelBrick3x6x8PV / LeadBrick2x4x16PV
+152   156   skin          1664.158   150.21 x    1.03 x   12.49  CopperFwall23PV / CopperBwall24PV
+96    172   coplanar      1621.923   185.09 x    0.28 x  101.60  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+82    87    coplanar      1529.032   203.20 x    0.22 x  101.60  LeadBrick2x4x8PV / BPFwall15PV
+87    153   coplanar      1529.032   203.20 x    0.22 x  101.60  BPFwall15PV / LeadBrick2x4x8PV
+84    87    coplanar      1529.032   101.60 x    0.15 x  203.20  LeadBrick2x4x8PV / BPFwall15PV
+49    87    coplanar      1529.032   101.60 x    0.15 x  203.20  LeadBrick2x4x8PV / BPFwall15PV
+13    160   coplanar      1505.485   201.37 x  101.75 x    0.07  BPFwall4PV / LeadBrick2x4x8PV
+13    123   coplanar      1505.485   201.37 x  101.75 x    0.07  BPFwall4PV / LeadBrick2x4x8PV
+13    115   coplanar      1505.349   201.37 x  101.74 x    0.07  BPFwall4PV / LeadBrick2x4x8PV
+94    169   coplanar      1344.647   191.01 x    0.28 x   50.80  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+13    122   coplanar      1330.481   177.97 x  101.73 x    0.07  BPFwall4PV / LeadBrick2x4x8PV
+13    130   coplanar      1330.481   177.97 x  101.73 x    0.07  BPFwall4PV / LeadBrick2x4x8PV
+13    207   coplanar      1330.361   177.97 x  101.72 x    0.07  BPFwall4PV / LeadBrick2x4x8PV
+94    167   coplanar      1326.590   191.01 x    0.28 x   50.12  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+95    172   coplanar      1320.294   149.61 x    0.26 x  101.60  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+64    70    coplanar      1277.556   203.21 x   15.87 x    0.40  LeadBrick2x4x8PV / PolyFwall12PV
+151   180   skin          1264.617   200.89 x    1.07 x    6.80  CopperBkwall22PV / CopperBkwall38PV
+43    70    coplanar      1220.024   406.41 x   15.31 x    0.20  LeadFwall9PV / PolyFwall12PV
+75    196   coplanar      1143.004     0.15 x   50.86 x  203.20  CopperBkwall14PV / LeadBrick2x4x8PV
+75    218   coplanar      1143.004     0.15 x   50.86 x  203.20  CopperBkwall14PV / LeadBrick2x4x8PV
+40    189   coplanar      1141.968   101.60 x    0.30 x   50.80  LeadBrick2x4x16PV / SteelBrick3x6x8PV
+6     135   coplanar      1124.077    76.20 x    0.44 x   76.20  SteelBkwall2PV / SteelRwall19PV
+75    214   coplanar      1071.566     0.15 x   50.86 x  190.50  CopperBkwall14PV / LeadBrick2x4x8PV
+177   223   coplanar      1052.781   406.40 x    0.32 x  101.60  LeadBrick2x4x16PV / SteelFwall45PV
+203   223   coplanar      1052.781   406.40 x    0.32 x  101.60  LeadBrick2x4x16PV / SteelFwall45PV
+43    64    coplanar      1013.811     0.27 x  100.89 x   50.60  LeadFwall9PV / LeadBrick2x4x8PV
+75    162   coplanar       895.627     0.25 x  101.60 x   50.80  CopperBkwall14PV / LeadBwall29PV
+75    175   coplanar       895.627     0.25 x  101.60 x   50.80  CopperBkwall14PV / LeadBkwall35PV
+40    190   coplanar       856.476   152.40 x    0.22 x   50.80  LeadBrick2x4x16PV / SteelBrick3x6x8PV
+22    57    coplanar       822.907     0.36 x   50.80 x   50.84  LeadBrick2x4x8PV / LeadBrick2x4x16PV
+41    152   coplanar       781.266    60.78 x    0.47 x   60.78  LeadBrick2x4x8PV / CopperFwall23PV
+9     36    skin           771.728   119.56 x    0.51 x  101.60  CopperBkwall3PV / LeadBrick2x4x8PV
+4     13    coplanar       750.154   201.37 x  101.57 x    0.04  LeadBrick2x4x8PV / BPFwall4PV
+75    155   coplanar       745.504     0.11 x   99.54 x  203.20  CopperBkwall14PV / LeadBrick2x4x8PV
+75    77    coplanar       745.504     0.11 x   99.54 x  203.20  CopperBkwall14PV / LeadBrick2x4x8PV
+96    152   coplanar       727.167   107.01 x    0.21 x  101.60  LeadBrick2x4x8PV / CopperFwall23PV
+200   215   skin           722.576    25.56 x   50.80 x   50.80  LeadFwall41PV / SteelTube43PV
+215   222   skin           722.576    25.56 x   50.80 x   50.80  SteelTube43PV / LeadFwall41PV
+75    76    coplanar       698.910     0.11 x   99.54 x  190.50  CopperBkwall14PV / LeadBrick2x4x8PV
+26    99    coplanar       676.199     0.30 x   50.52 x   50.84  LeadBrick2x4x8PV / LeadBrick2x4x16PV
+13    19    coplanar       662.953   177.97 x  101.56 x    0.04  BPFwall4PV / LeadBrick2x4x8PV
+32    190   coplanar       570.983   101.60 x    0.18 x   50.80  LeadBrick2x4x16PV / SteelBrick3x6x8PV
+190   194   coplanar       570.983   101.60 x    0.18 x   50.80  SteelBrick3x6x8PV / LeadBrick2x4x16PV
+59    189   coplanar       570.983    50.80 x    0.26 x   50.80  LeadBrick2x4x8PV / SteelBrick3x6x8PV
+95    151   coplanar       552.355    44.31 x    0.16 x  101.60  LeadBrick2x4x8PV / CopperBkwall22PV
+163   173   coplanar       540.954    18.96 x    0.27 x  110.30  AluminumFwall30PV / SteelFwall34PV
+9     41    coplanar       529.945    78.75 x    0.48 x   78.75  CopperBkwall3PV / LeadBrick2x4x8PV
+46    152   coplanar       514.949    61.18 x    0.32 x   61.18  LeadBrick2x4x8PV / CopperFwall23PV
+9     42    coplanar       502.034   119.56 x    0.36 x  101.60  CopperBkwall3PV / LeadBrick2x4x8PV
+97    161   coplanar       464.142    71.84 x    0.19 x   83.49  LeadBrick2x4x8PV / SteelBwall28PV
+57    101   coplanar       409.870     0.36 x   50.80 x   25.30  LeadBrick2x4x16PV / BPFwall16PV
+87    204   coplanar       380.656     0.09 x   25.40 x  203.20  BPFwall15PV / LeadBrick2x4x8PV
+87    216   coplanar       380.656     0.09 x   25.40 x  203.20  BPFwall15PV / LeadBrick2x4x8PV
+87    205   coplanar       380.656     0.09 x   25.40 x  203.20  BPFwall15PV / LeadBrick2x4x8PV
+106   217   coplanar       380.377    50.65 x    0.07 x  203.20  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+112   140   coplanar       380.377    50.65 x    0.07 x  203.20  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+17    30    coplanar       380.377    50.65 x    0.07 x  203.20  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+88    216   coplanar       379.826     0.09 x   25.34 x  203.20  BPFwall15PV / LeadBrick2x4x8PV
+88    204   coplanar       379.826     0.09 x   25.34 x  203.20  BPFwall15PV / LeadBrick2x4x8PV
+88    205   coplanar       379.826     0.09 x   25.34 x  203.20  BPFwall15PV / LeadBrick2x4x8PV
+9     46    coplanar       346.722    79.15 x    0.33 x   79.15  CopperBkwall3PV / LeadBrick2x4x8PV
+99    101   coplanar       338.772     0.30 x   50.80 x   25.30  LeadBrick2x4x16PV / BPFwall16PV
+75    180   coplanar       331.445     0.29 x  137.70 x   12.70  CopperBkwall14PV / CopperBkwall38PV
+43    215   skin           319.999    25.48 x   50.80 x   50.80  LeadFwall9PV / SteelTube43PV
+190   201   coplanar       285.492    50.80 x    0.15 x   50.80  SteelBrick3x6x8PV / LeadBrick2x4x8PV
+55    190   coplanar       285.492    50.80 x    0.15 x   50.80  LeadBrick2x4x8PV / SteelBrick3x6x8PV
+76    220   coplanar       283.596     0.30 x   98.64 x   12.70  LeadBrick2x4x8PV / CopperBwall44PV
+175   180   coplanar       257.610   201.13 x  101.75 x    0.01  LeadBkwall35PV / CopperBkwall38PV
+96    161   coplanar       251.086    60.20 x    0.18 x   60.20  LeadBrick2x4x8PV / SteelBwall28PV
+28    71    coplanar       235.808    25.40 x    0.03 x  814.60  AluminumBkwall7PV / BPFwall13PV
+198   210   coplanar       219.838     0.08 x  101.60 x  203.20  LeadBrick2x4x8PV / BPBrick1x10x24PV
+199   210   coplanar       219.838     0.08 x  101.60 x  203.20  LeadBrick2x4x8PV / BPBrick1x10x24PV
+75    158   coplanar       207.023     0.10 x   23.39 x  101.60  CopperBkwall14PV / LeadBkwall26PV
+9     99    coplanar       203.286   106.86 x    0.20 x   88.89  CopperBkwall3PV / LeadBrick2x4x16PV
+4     123   coplanar       190.328   203.20 x    0.17 x   50.76  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+19    130   coplanar       190.328   203.20 x    0.17 x   50.76  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+96    151   coplanar       177.143    44.31 x    0.16 x  101.60  LeadBrick2x4x8PV / CopperBkwall22PV
+35    172   coplanar       171.902    24.12 x    0.31 x   48.23  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+100   169   coplanar       171.509    11.79 x    0.29 x   50.80  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+75    99    coplanar       160.157    12.19 x    0.16 x   88.90  CopperBkwall14PV / LeadBrick2x4x16PV
+94    151   coplanar       156.666    12.11 x    0.14 x  101.60  LeadBrick2x4x8PV / CopperBkwall22PV
+9     38    coplanar       155.312    40.41 x    0.30 x   40.41  CopperBkwall3PV / LeadBrick2x4x8PV
+214   220   coplanar       148.889     0.33 x   39.06 x   12.70  LeadBrick2x4x8PV / CopperBwall44PV
+9     33    coplanar       122.488    25.11 x    0.44 x   25.11  CopperBkwall3PV / LeadBrick2x4x8PV
+28    202   coplanar       116.203    50.80 x    0.05 x  203.20  AluminumBkwall7PV / LeadBrick2x4x8PV
+28    213   coplanar       116.203    50.80 x    0.05 x  203.20  AluminumBkwall7PV / LeadBrick2x4x8PV
+28    221   coplanar       116.203    50.80 x    0.05 x  203.20  AluminumBkwall7PV / LeadBrick2x4x8PV
+15    24    coplanar       112.887     0.08 x   50.80 x   50.80  LeadBrick2x4x8PV / SteelFwall6PV
+100   167   coplanar       101.683    11.79 x    0.29 x   30.12  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+97    165   coplanar        96.104    12.19 x    0.15 x   62.99  LeadBrick2x4x8PV / LeadBkwall31PV
+54    205   coplanar        95.164     0.06 x   50.80 x  101.60  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+158   180   coplanar        63.265   200.99 x   22.63 x    0.01  LeadBkwall26PV / CopperBkwall38PV
+152   178   coplanar        53.135   279.51 x    0.21 x  279.06  CopperFwall23PV / CopperBkwall36PV
+151   179   coplanar        46.212    12.70 x    0.02 x  324.79  CopperBkwall22PV / CopperBkwall37PV
+97    151   coplanar        41.325    12.11 x    0.14 x   26.80  LeadBrick2x4x8PV / CopperBkwall22PV
+165   180   coplanar        38.289   200.89 x   13.76 x    0.01  LeadBkwall31PV / CopperBkwall38PV
+111   152   coplanar        34.439     9.68 x    0.05 x   92.70  CopperBkwall17PV / CopperFwall23PV
+163   168   coplanar        33.121     0.02 x   19.05 x  110.30  AluminumFwall30PV / AluminumFwall32PV
+152   159   coplanar        25.354    12.70 x    0.02 x  190.20  CopperFwall23PV / CopperRwall27PV
+9     98    coplanar        25.227    20.01 x    0.14 x   20.01  CopperBkwall3PV / LeadBrick2x4x8PV
+97    172   coplanar        20.038    23.29 x    0.16 x   11.64  LeadBrick2x4x8PV / LeadBrick2x4x8PV
+22    99    coplanar         3.962     0.26 x    0.31 x   50.80  LeadBrick2x4x8PV / LeadBrick2x4x16PV
+95    152   coplanar         1.865     5.41 x    0.13 x    5.41  LeadBrick2x4x8PV / CopperFwall23PV
+
+coplanar = two faces sharing a plane (stacked bricks).
+skin     = a shell over a coincident curved surface, e.g. a tube
+           in a bore cut to the same radius. Designed fits.
+real     = one solid genuinely occupying another's space.
+
+ONLY THE 1 'real' ROW(S) NEED ATTENTION.
+
+REAL overlaps by shape_id: 31 x1, 35 x1

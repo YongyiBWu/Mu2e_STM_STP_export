@@ -52,7 +52,9 @@ EXTRACTOR = os.path.join(HERE, "extract_stm_geometry.py")
 
 # (stage number, filename, what it writes, reads the 74MB full assembly?)
 STAGES = [
-    ("00", "00_detect_global_tilt.py", ["tilt.json"], False),
+    # tilt.json is written only when one global angle is correct for the whole
+    # model; tilt_state.json, the per-solid classification, is written always.
+    ("00", "00_detect_global_tilt.py", ["tilt_state.json", "tilt.json"], False),
     ("01", "01_parse_msb_colours.py", ["full_msb_colours.json"], False),
     ("02", "02_bind_colours_by_centroid.py", ["full_solids_colour.json"], True),
     ("03", "03_msb_face_signatures.py", ["full_msb_sigs.json"], True),
@@ -180,8 +182,16 @@ def main():
     rec = tilt_verdict()
     print()
     if rec is None:
-        print("  tilt: no output/tilt.json -- stage 00 found no global tilt, or")
-        print("        did not run. The extractor will use its built-in value.")
+        # Deliberately says nothing about HOW the model splits: those counts
+        # belong to stage 00's own table, and hardcoding this geometry's
+        # numbers here would be a lie on the next export.
+        print("  tilt: no output/tilt.json. Stage 00 writes it ONLY when one")
+        print("        global angle is correct for the whole model -- so its")
+        print("        absence means either a piecewise tilt (de-tilt per")
+        print("        solid, never globally), no tilt at all, or that the")
+        print("        stage did not run. Read its verdict and per-solid")
+        print("        table above; the extractor falls back to its built-in")
+        print("        TILT_DEG meanwhile.")
     else:
         print("  tilt: %.15g deg measured from %s"
               % (rec.get("tilt_deg", float("nan")), rec.get("source", "?")))

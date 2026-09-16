@@ -16,9 +16,17 @@ side has the same key as one standing up, so the 146 group whatever way round
 they sit.
 
 Dimensions are measured by projecting vertices onto the solid's own recovered
-face normals, not read off the bounding box -- with the model tilted a bbox is
+face normals, not read off the bounding box -- for a tilted solid a bbox is
 wrong by ~0.3mm on a 50.8 face and badly wrong on the 45 deg solids. Where a
 clean orthogonal frame cannot be recovered, it falls back to the bbox.
+
+Measuring in each solid's OWN frame is also what makes this dedup immune to the
+tilt being piecewise (208 of 224 solids carry it, 12 do not -- see stage 00).
+A key built from world-aligned dimensions would put a square brick and a tilted
+copy of the same brick in different groups. Confirmed on the real data: shape 1
+has 146 members, 144 tilted and 2 square (solids 15 and 139), and they group
+together. If a future export ever splits a shape that should be one, a
+world-frame measurement creeping in is the first thing to suspect.
 
 Volume is part of the key on purpose: two blocks of equal outside size but
 different drilled holes hold different amounts of material and are different
@@ -39,7 +47,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 OUTDIR = os.path.join(ROOT, "output")
 SIMPLE = os.path.join(ROOT, "STM_STP_files",
-                      "F10269585--_1-G4 Shield House Simplified.stp")
+                      "F10269585--_1-G4 Shield House_2.stp")
 
 sh = Part.read(SIMPLE)
 

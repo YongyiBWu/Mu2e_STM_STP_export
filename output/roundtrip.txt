@@ -1,0 +1,31 @@
+CAD->Mu2e matrix agrees with the extractor to 0.00e+00 mm
+reading F10269585--_1-G4 Shield House Simplified.stp
+  224 solids in the STEP, 224 placements in the CSVs
+
+
+======================================================================
+checked 218 solids: 218 passed, 0 FAILED, 6 skipped
+
+What this proves:
+   Every input comes from the CSVs -- dimensions, position, bores,
+   prism outlines AND the rotation (r11..r33 in stm_placements.csv).
+   Nothing is recovered from the STEP except the solid being compared
+   against, so a pass means a consumer holding only the CSVs rebuilds
+   the part, placed and oriented.
+
+   The residual shortfall on a passing solid is the de-tilt: a
+   world-aligned bounding box around a tilted solid is inflated
+   (50.80 mm reads 51.09), so a boolean intersection loses a few
+   tenths of a percent even when the geometry is exact.
+
+worst observed:
+   overlap   0.996030    (tol 0.995, ideal 1.0)  <- the primary check
+   volume    1.301e-04   (tol 2e-03)
+   centroid  0.0008 mm  (tol 0.05)
+   extent    0.3686 mm  (tol 0.25)
+   inertia   8.036e-05   (tol 5e-03)
+   orientation 0.0832 deg  (tol 0.20)
+
+6 solid(s) not compared:
+   BOX_HOLE: no rotation recorded in the CSV      x3
+   BOX: no rotation recorded in the CSV           x3

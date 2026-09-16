@@ -16,6 +16,14 @@ solids share a centroid, which is common for concentric parts. Script 05
 replaces it with an ordering-based bind that resolves all 224. Kept because the
 exact/near/miss counts it prints are what showed the method was insufficient.
 
+Centroids are used raw, in the CAD frame, with no de-tilt applied. That happens
+to be the right call under a PIECEWISE tilt (208 of 224 solids carry it, 12 are
+square -- see stage 00): a solid sits at the same CAD centroid in both files
+whatever its tilt state, so matching like against like needs no transform. The
+0.5mm bucket and the 0.05/2.0mm thresholds are far coarser than the ~0.3mm a
+tilt displaces a face, so the tilt is not what limits this method -- shared
+centroids are.
+
 Slow: reads the 74MB full assembly with the kernel (~minutes).
 """
 

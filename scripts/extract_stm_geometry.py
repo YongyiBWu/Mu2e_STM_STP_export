@@ -7,20 +7,39 @@ Run with FreeCAD's bundled interpreter (FreeCAD must be imported before Part):
     "C:/Program Files/FreeCAD 1.1/bin/python.exe" scripts/extract_stm_geometry.py
 
 Inputs
-    STM_STP_files/F10269585--_1-G4 Shield House Simplified.stp   (224 solids)
+    STM_STP_files/F10269585--_1-G4 Shield House_2.stp   (224 solids)
     STM_STP_files/F10258491--_1-Shield House Square.stp          (390 solids)
 
 Outputs (output/)
     stm_shapes.csv      one row per distinct shape: the block definitions
     stm_placements.csv  one row per solid: which shape goes where
     stm_bores.csv       cylindrical cuts, for the G4SubtractionSolid cases
+    stm_prisms.csv      cap outlines for the G4ExtrudedSolid cases
+
+Bore positions
+    stm_bores.csv gives each bore as dx/dy/dz RELATIVE to its block's centre.
+    That is what a G4SubtractionSolid needs, and unlike an absolute position it
+    stays valid for every placement of a shape -- the 146 identical bricks share
+    one definition, so a world position measured from one of them means nothing
+    for the other 145. Absolute x/y/z is carried alongside for cross-checking
+    against the CAD only.
+
+    The centre of a bore is NOT a cylindrical face's Surface.Center: OCC puts
+    that at the surface's parametric origin, which can sit well outside the
+    block. It is recovered by projecting the face's vertices onto its own axis
+    and taking the midpoint of the span.
 
 Coordinate transform (CAD -> Mu2e)
-    1. De-tilt by +0.041591 deg about z. The NX export carries a spurious
+    1. De-tilt by 0.041591 deg about z. The NX export carries a spurious
        rotation: planar normals cluster at 0.0416 and 89.9584 deg mod 90, one
        global value, not per-part scatter. It is a CAD error, so it is removed.
-       Afterwards only 28 of 1364 planar faces are off-axis, and those are
+       Afterwards 251 of 1364 planar faces are off-axis, and those are the
        genuine 45 deg features.
+
+       Mind the sign: the rotation applied is +TILT_DEG, not -TILT_DEG, because
+       step 2 negates x afterwards and that mirror flips the sign of an angle
+       in the xy plane. See the comment on _T -- getting this backwards leaves
+       2x the tilt in every direction and is nearly invisible downstream.
     2. CAD x -> -x, y -> y, z -> -z, i.e. 180 deg about y.
     3. Subtract the anchor so it lands on _STMShieldingRef.
 
@@ -86,7 +105,7 @@ ROOT = os.path.dirname(HERE)
 OUTDIR = os.path.join(ROOT, "output")
 
 SIMPLE = os.path.join(ROOT, "STM_STP_files",
-                      "F10269585--_1-G4 Shield House Simplified.stp")
+                      "F10269585--_1-G4 Shield House_2.stp")
 FULL = os.path.join(ROOT, "STM_STP_files",
                     "F10258491--_1-Shield House Square.stp")
 
@@ -166,8 +185,22 @@ MATERIAL_WORD = {
 
 # ---------------------------------------------------------------- transform
 
-# Rotating by -TILT_DEG undoes the tilt the exporter baked in.
-_T = math.radians(-TILT_DEG)
+# Rotating by +TILT_DEG undoes the tilt the exporter baked in -- note the sign.
+#
+# The obvious choice is -TILT_DEG, and it is wrong, because the rotation is not
+# the last thing that happens to a direction: x is negated afterwards (the 180
+# deg flip about y). Negating x mirrors the vector, which flips the SIGN of its
+# angle in the xy plane. So a direction sitting at +tilt arrives at -tilt from
+# the mirror alone, and pre-rotating by -tilt takes it to -2*tilt instead of 0.
+#
+# The error is invisible to is_axis_aligned(), since 2*tilt displaces a unit
+# vector by only 1.05e-6 against a TOL_AXIS of 1e-4, and the BOX paths use
+# bounding-box dimensions rather than the vector itself. It shows up only where
+# a transformed direction reaches a CSV: bore axes and prism basis vectors.
+#
+# Checked against all 1364 planar normals: with +TILT_DEG, 251 are left
+# off-axis (the genuine 45 deg faces); with -TILT_DEG, 856 are.
+_T = math.radians(TILT_DEG)
 
 
 def transform(x, y, z):
@@ -260,6 +293,535 @@ def cylinders(solid):
             if f.Surface.__class__.__name__ == "Cylinder"]
 
 
+# Caps count as congruent within this relative area difference. Not exact
+# equality: solid 178's two caps differ by 1 part in 5e5 -- real CAD noise on a
+# face of 4859 mm^2 -- and demanding exactness would reject a genuine
+# extrusion and force it back to a bounding envelope.
+TOL_CAP_AREA = 1e-4
+
+
+# Coplanarity tolerance for grouping the faces of one cap, mm. Solid 220's
+# cap pieces sit 0.022 mm apart because the solid straddles the piecewise tilt
+# -- part modelled tilted, part square -- so exact coplanarity is too strict.
+# Still far below the smallest real feature (12.7 mm).
+TOL_PLANE = 0.05
+
+# Volume tolerance for a SPLIT cap only; single-face caps keep TOL_VOL. The
+# step that splits a cap also stops the solid being an exact sweep: solid 220
+# reads 1.4968e-4 against area*length. See the note at the check itself.
+TOL_VOL_SPLIT = 5e-4
+
+
+def _outline_area(face):
+    """Area of a face's outer boundary, ignoring holes drilled through it.
+
+    face.Area is the material left AFTER a bore breaks the surface, so two
+    congruent caps report different areas when a hole pierces one of them.
+    Adding the inner wires back compares the outlines themselves.
+    """
+    inner = 0.0
+    for w in face.Wires:
+        if not w.isSame(face.OuterWire):
+            try:
+                inner += Part.Face(w).Area
+            except Exception:
+                pass
+    return face.Area + inner
+
+
+def _union_boundary(faces, nd=3):
+    """Ordered boundary points of several coplanar faces, or None.
+
+    Edges interior to the union appear twice (once from each face) and edges on
+    the boundary appear once, so dropping the doubled ones and walking what is
+    left gives the outline in true order. Ordering by angle about the centroid
+    would be simpler and is wrong: 5 of the 13 caps here are non-convex.
+
+    Returns the ORIGINAL FreeCAD points, full precision. Rounding is used only
+    to decide which vertices are the same one: returning the rounded values
+    instead silently truncated stored outlines (526.5575 became 526.5571).
+    """
+    def key(p):
+        return (round(p.x, nd), round(p.y, nd), round(p.z, nd))
+
+    exact = {}
+    seen = collections.defaultdict(list)
+    for f in faces:
+        for e in f.OuterWire.Edges:
+            a, b = e.Vertexes[0].Point, e.Vertexes[-1].Point
+            ka, kb = key(a), key(b)
+            exact.setdefault(ka, a)
+            exact.setdefault(kb, b)
+            seen[frozenset((ka, kb))].append((ka, kb))
+    bnd = [v[0] for v in seen.values() if len(v) == 1]
+    if not bnd:
+        return None
+
+    adj = collections.defaultdict(list)
+    for a, b in bnd:
+        adj[a].append(b)
+        adj[b].append(a)
+    # A clean ring: every corner joins exactly two boundary edges.
+    if any(len(v) != 2 for v in adj.values()):
+        return None
+
+    start = bnd[0][0]
+    order = [start]
+    prev, cur = None, start
+    while True:
+        nxt = [n for n in adj[cur] if n != prev]
+        if not nxt:
+            return None
+        step = nxt[0]
+        if step == start:
+            break
+        order.append(step)
+        prev, cur = cur, step
+        if len(order) > len(adj):
+            return None
+    return [exact[k] for k in order]
+
+
+def bore_volume(solid):
+    """Material removed by this solid's cylindrical faces, mm^3.
+
+    Each bore's length is its own face's vertex span along its axis, the same
+    measurement the BOX_HOLE branch uses for depth, so a blind hole is not
+    charged the full thickness of the block.
+    """
+    total = 0.0
+    for f in cylinders(solid):
+        ax = f.Surface.Axis
+        pts = [v.Point for v in f.Vertexes]
+        if not pts:
+            continue
+        pr = [p.x * ax.x + p.y * ax.y + p.z * ax.z for p in pts]
+        total += math.pi * f.Surface.Radius ** 2 * (max(pr) - min(pr))
+    return total
+
+
+def extrusion(solid, planar_only=False, ref_volume=None):
+    """Cap polygon and length if this solid is an extrusion, else None.
+
+    planar_only=True ignores cylindrical faces, for a block that is an
+    extrusion once its bores are set aside. ref_volume then supplies the
+    volume the sweep is checked against -- solid.Volume plus what the bores
+    removed -- because a drilled solid is lighter than its own outline sweeps.
+
+    An extrusion has one axis along which exactly two faces are perpendicular
+    (the caps, congruent and parallel) and every remaining face is parallel
+    (the walls). That is precisely what G4ExtrudedSolid takes: a 2D outline
+    swept a given distance.
+
+    Returns the cap outline as 2D points in the cap's own plane, with the two
+    in-plane basis vectors and the axis, all in Mu2e coordinates, so a
+    constructSTM.cc can build the solid and orient it without going back to
+    the STEP file.
+
+    The volume is checked against area*length: a solid can pass the face test
+    and still be a sheared prism whose volume falls short.
+    """
+    faces = []
+    for f in solid.Faces:
+        if f.Surface.__class__.__name__ != "Plane":
+            if planar_only:
+                continue
+            return None
+        n = f.normalAt(0, 0)
+        n.normalize()
+        faces.append((f, n))
+    vol = solid.Volume if ref_volume is None else ref_volume
+
+    for _, cand in faces:
+        caps = [f for f, n in faces if abs(abs(n.dot(cand)) - 1.0) < TOL_UNIT]
+        walls = [f for f, n in faces if abs(n.dot(cand)) < TOL_UNIT]
+        if len(caps) < 2 or len(caps) + len(walls) != len(faces):
+            continue
+
+        # One cap can be SPLIT across several faces, so group the cap-normal
+        # faces by where they sit along the candidate axis instead of demanding
+        # exactly two of them.
+        #
+        # Solid 220 is the case: swept along y, both of its caps are two faces,
+        # which the old "exactly two" test read as four caps and rejected. Its
+        # two pieces are also 0.022 mm out of plane, because part of that solid
+        # was modelled tilted and part square -- it straddles the piecewise
+        # tilt -- so TOL_PLANE has to absorb a real step, not just noise. It
+        # stays far below the smallest true feature here (12.7 mm).
+        groups = []
+        for f in caps:
+            p = f.Vertexes[0].Point
+            off = p.x * cand.x + p.y * cand.y + p.z * cand.z
+            for g in groups:
+                if abs(g[0] - off) < TOL_PLANE:
+                    g[1].append(f)
+                    break
+            else:
+                groups.append((off, [f]))
+        if len(groups) != 2:
+            continue
+
+        # Congruence on the OUTLINE, adding back what a bore removed: a cap a
+        # hole breaks through reports less area than its twin, and solid 220's
+        # z-faces differ by exactly one bore's 4053.7 mm^2 that way.
+        near, far = groups[0][1], groups[1][1]
+        a0 = sum(_outline_area(f) for f in near)
+        a1 = sum(_outline_area(f) for f in far)
+        if abs(a0 - a1) / max(a0, a1) > TOL_CAP_AREA:
+            continue
+
+        # The outline, as points to walk.
+        #
+        # A single-face cap keeps its own OuterWire verbatim -- same order,
+        # same start vertex, same full precision. That is deliberate: routing
+        # every prism through the stitching path instead changed 12 of 13
+        # outlines (flipped bases, moved anchors, truncated coordinates) while
+        # still not recovering 220. Stitching is only for the case that needs
+        # it, so everything that already worked is untouched by construction.
+        if len(near) == 1:
+            cap_pts = [v.Point for v in near[0].OuterWire.OrderedVertexes]
+        else:
+            cap_pts = _union_boundary(near)
+            if cap_pts is None:
+                continue
+
+        pts = [v.Point for v in solid.Vertexes]
+        pr = [p.x * cand.x + p.y * cand.y + p.z * cand.z for p in pts]
+        length = max(pr) - min(pr)
+
+        # A split cap gets a looser volume bound, because the step that splits
+        # it makes the solid not quite a sweep.
+        #
+        # Solid 220's cap pieces sit 0.022 mm out of plane -- it straddles the
+        # piecewise tilt -- and over its 3932.5 mm^2 profile that wedge is 81.06
+        # mm^3, so area*length overstates the true volume by 1.4968e-4. That is
+        # real geometry, not a bad measurement: bore_volume() was checked
+        # against the material actually removed (holes plugged and re-measured)
+        # and agreed to -0.000 mm^3.
+        #
+        # Deliberately NOT applied when both caps are single faces. TOL_VOL is
+        # what stops a sheared prism from passing as a clean one, and every
+        # solid that already classifies keeps it untouched; only the case whose
+        # cause is identified is allowed the slack, and 5e-4 still rejects any
+        # shear worth the name.
+        tol_vol = TOL_VOL_SPLIT if (len(near) > 1 or len(far) > 1) else TOL_VOL
+        if length <= 0 or abs(a0 * length / vol - 1.0) > tol_vol:
+            continue
+
+        # Sweep midpoint along the axis: the plane the origin sits on.
+        mid = (max(pr) + min(pr)) / 2.0
+
+        # In-plane axes for expressing the cap outline in 2D.
+        #
+        # Any pair square to the extrusion axis is geometrically valid, but the
+        # CHOICE decides how easy the later rotation is to reason about. Prefer
+        # an edge that already runs along a world axis once transformed: then
+        # local x (or y) coincides with Mu2e x (or y) and the rotation is a
+        # plain permutation instead of an arbitrary in-plane spin.
+        #
+        # Deliberately NOT the longest edge -- that rule fails here. Shape 23's
+        # longest edge is 744.665 mm and already on x, so it would change
+        # nothing, while 6 of 11 prisms have their longest edge at 45 or 90 deg
+        # to everything.
+        # Basis candidates come from the FACE's own edges when the cap is a
+        # single face, exactly as before. Walking cap_pts instead reverses the
+        # traversal direction on some caps, which flips the sign of u (and so
+        # of w and the whole outline) -- it silently changed 6 of 13 prisms
+        # that way. Only a stitched cap, which has no single face to ask, uses
+        # the walked boundary.
+        edges = []
+        if len(near) == 1:
+            for e in near[0].Edges:
+                d = e.Vertexes[-1].Point.sub(e.Vertexes[0].Point)
+                if d.Length > 1e-9:
+                    d.normalize()
+                    if abs(d.dot(cand)) < TOL_UNIT:
+                        edges.append(d)
+        else:
+            for i in range(len(cap_pts)):
+                d = cap_pts[(i + 1) % len(cap_pts)].sub(cap_pts[i])
+                if d.Length > 1e-9:
+                    d.normalize()
+                    if abs(d.dot(cand)) < TOL_UNIT:
+                        edges.append(d)
+        if not edges:
+            return None
+
+        # Rank: an edge whose TRANSFORMED direction lies on a world axis wins;
+        # x is preferred over y so the choice is deterministic when both exist.
+        def rank(d):
+            t = transform_dir(d.x, d.y, d.z)
+            m = max(range(3), key=lambda i: abs(t[i]))
+            if abs(abs(t[m]) - 1.0) > TOL_AXIS:
+                return (2, 0)              # not axis-aligned at all
+            return (0 if m == 0 else 1, m)  # x best, then y/z
+
+        u = min(edges, key=rank)
+        w = cand.cross(u)
+        w.normalize()
+        # If w landed on a world axis but u did not, swap them so the aligned
+        # edge is local x rather than local y.
+        if rank(u)[0] == 2 and rank(w)[0] < 2:
+            u, w = w, cand.cross(w)
+            w.normalize()
+
+        # Walk the cap's outer wire so the polygon comes out ordered, which is
+        # what G4ExtrudedSolid needs -- an unordered point set would build a
+        # self-intersecting face.
+        #
+        # The outline is expressed RELATIVE TO THE SOLID'S CENTRE, not as raw
+        # projected CAD coordinates. transform() is rotate -> negate x,z ->
+        # subtract the anchor; the rotation and negation are linear and so
+        # survive being folded into the stored u/w basis, but the anchor
+        # translation does not. Projecting untransformed points onto the basis
+        # silently dropped it, leaving every outline offset by a constant ~512mm
+        # and unplaceable. Subtracting the centre first removes the translation
+        # from both sides, so the outline composes with a placement's x,y,z the
+        # same way bore offsets do.
+        raw = []
+        for p in cap_pts:
+            raw.append((p.x * u.x + p.y * u.y + p.z * u.z,
+                        p.x * w.x + p.y * w.y + p.z * w.z))
+
+        # Origin on a VERTEX, not on the centroid.
+        #
+        # The outline still has to be expressed relative to something on the
+        # solid rather than as raw projected CAD coordinates: transform() is
+        # rotate -> negate x,z -> subtract the anchor, and while the rotation
+        # and negation fold into the stored u/w basis, the anchor translation
+        # does not. Projecting untransformed points left every outline offset
+        # by a constant ~512 mm and unplaceable.
+        #
+        # The centre satisfied that but put (0,0) inside the polygon, which is
+        # awkward to reason about when composing rotations by hand. Anchoring
+        # on the first ordered vertex keeps the translation removed AND puts
+        # the origin on a corner you can point at.
+        ou, ow = raw[0]
+        outline = [(round(a - ou, 4), round(b - ow, 4)) for a, b in raw]
+
+        # The placement has to move WITH the origin. pos is the point the
+        # outline is expressed relative to, so anchoring on a vertex while pos
+        # still pointed at the solid's centre put the vertex where the centre
+        # belonged -- every prism landed 350mm out and the round-trip overlap
+        # fell to 0.0008. The anchor vertex in CAD space is the first ordered
+        # vertex projected back onto the basis, plus its component along the
+        # sweep axis at the mid-plane, so the origin sits on the cap's vertex
+        # at the sweep half-length.
+        anchor_cad = (u * ou) + (w * ow) + (cand * mid)
+        anchor = transform(anchor_cad.x, anchor_cad.y, anchor_cad.z)
+        return {
+            "prism_axis": transform_dir(cand.x, cand.y, cand.z),
+            "prism_u": transform_dir(u.x, u.y, u.z),
+            "prism_w": transform_dir(w.x, w.y, w.z),
+            "prism_len": length,
+            "prism_outline": outline,
+            "prism_area": a0,
+            # Where the outline's (0,0) actually sits, in Mu2e. The caller
+            # overrides pos with this so the placement and the origin describe
+            # one point.
+            "prism_anchor": anchor,
+        }
+    return None
+
+
+def canonical_frame(axes, dims, longest_x, symmetric=False):
+    """Put a solid in a canonical frame, and give the rotation back to world.
+
+    The shape row and the rotation column have to share one convention or they
+    cannot be composed. Deriving them separately is what broke earlier: the
+    dimensions were labelled by which WORLD axis each own-axis pointed along,
+    while the rotation was built from the solid's own axis ORDER. Those are
+    different orderings, so applying the rotation to the dimensions
+    double-counted the orientation.
+
+    Here the canonical frame is defined first and the rotation is defined AS
+    the map from it to the world, so the two agree by construction.
+
+    The convention, per the Geant4 build being the destination:
+
+        longest_x=False (a plain box)
+            the two longest extents lie on x and y, the shortest on z, so a
+            slab sits flat and its height is z.
+        longest_x=True (anything with a bore, a cylinder, or a swept profile)
+            the longest extent lies on x, since those parts are built along
+            their axis.
+
+    Right-handedness: a permutation of three axes can be improper (det = -1),
+    which would mirror the solid rather than rotate it. If the chosen ordering
+    comes out improper, one axis is negated -- that is a rotation of the same
+    frame, and the extents are unsigned, so nothing else changes.
+
+    Returns (dims_canonical, rotation) where rotation[row][col] maps the
+    canonical frame to Mu2e axes, or (dims, None) when the solid has no
+    axis-aligned orientation to express.
+    """
+    order = sorted(range(3), key=lambda i: -dims[i])       # longest first
+    if longest_x:
+        # longest -> x, then the remaining two longest -> y, z.
+        pick = [order[0], order[1], order[2]]
+    else:
+        # two longest -> x, y; shortest -> z.
+        pick = [order[0], order[1], order[2]]
+    cdims = [dims[i] for i in pick]
+    cax = [axes[i] for i in pick]
+
+    # Where does each canonical axis point in Mu2e?
+    #
+    # Two cases. When every canonical axis lands on a world axis the rotation
+    # is a signed permutation, and the sign canonicalisation below can use the
+    # box's own symmetry. When one does not -- a 45 deg part -- the rotation is
+    # still a perfectly ordinary proper rotation, just not a permutation, so
+    # emit the exact direction cosines instead of refusing.
+    #
+    # Refusing was the old behaviour, and it was over-cautious: it made sense
+    # while the only consumer was the permutation-based orientation string, but
+    # r11..r33 are floats and hold any rotation. Returning None there cost six
+    # solids their placement -- three 45 deg lead bricks (171/172/176) and
+    # three bored walls -- which then could not be rebuilt from the CSVs, were
+    # skipped by the verifier, and reached the G4 emitter as "set by hand".
+    dirs = [transform_dir(u.x, u.y, u.z) for u in cax]
+    world = []
+    for n in dirs:
+        if not is_axis_aligned(n):
+            world = None
+            break
+        k = max(range(3), key=lambda i: abs(n[i]))
+        world.append((k, 1 if n[k] > 0 else -1))
+    if world is not None and len({k for k, _ in world}) != 3:
+        world = None
+
+    if world is None:
+        # General rotation: column `own` is where that canonical axis points.
+        # Orthonormal because the axes came from orthogonal_frame(), which
+        # already checked they are mutually square.
+        r = [[dirs[own][row] for own in range(3)] for row in range(3)]
+        det = (r[0][0] * (r[1][1] * r[2][2] - r[1][2] * r[2][1])
+               - r[0][1] * (r[1][0] * r[2][2] - r[1][2] * r[2][0])
+               + r[0][2] * (r[1][0] * r[2][1] - r[1][1] * r[2][0]))
+        if det < 0:
+            # Improper: the measured axes form a left-handed set. Negating one
+            # column re-orients the frame without moving any face, exactly as
+            # in the permutation case. Extents are unsigned, so cdims stands.
+            for row in range(3):
+                r[row][2] = -r[row][2]
+        # No sign canonicalisation here: it relies on a 180 deg flip about an
+        # own axis being a self-map, which is a statement about the signed
+        # permutation, not about a general rotation.
+        return (cdims, r)
+
+    r = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    for own, (k, sign) in enumerate(world):
+        r[k][own] = sign
+
+    # det must be +1; if the permutation is improper, flip the z column, which
+    # re-orients the canonical frame without changing any measured extent.
+    det = (r[0][0] * (r[1][1] * r[2][2] - r[1][2] * r[2][1])
+           - r[0][1] * (r[1][0] * r[2][2] - r[1][2] * r[2][0])
+           + r[0][2] * (r[1][0] * r[2][1] - r[1][1] * r[2][0]))
+    if det < 0:
+        for row in range(3):
+            r[row][2] = -r[row][2]
+
+    # Canonicalise the signs, for a solid that is symmetric under a 180 deg
+    # flip about each of its own axes -- a PLAIN BOX and nothing else here.
+    #
+    # A rectangular box with three distinct edges has 24 rotational symmetries
+    # but only 6 distinct ways of assigning its edges to the world axes: the 6
+    # permutations. The other 4 per permutation are 180 deg flips that map the
+    # box onto itself, placing identical material and differing only in which
+    # end of each edge points which way. Recording the raw signed permutation
+    # over-reports -- shape 1 showed 13 distinct orientation strings for 5
+    # distinct placements plus 3 unrotatable copies.
+    #
+    # Flips must come in PAIRS: negating a single axis gives det = -1, a
+    # reflection, which would mirror the solid rather than rotate it. Flipping
+    # two at a time preserves det and keeps the frame proper, so the normal
+    # form is "as few negatives as parity allows" -- 0 or 1.
+    #
+    # NOT applied to BOX_HOLE: the bores break the symmetry. Flipping shape 9
+    # about y or z moves its holes, and a self-overlap test puts that at 0.889,
+    # not 1.0. Prisms do not use this path and are not symmetric either
+    # (shape 19 self-overlaps at 0.000 about y).
+    if symmetric:
+        # Reduce to a DETERMINISTIC representative, not merely to "few
+        # negatives". Flipping pairs until fewer than two remain leaves 0 or 1,
+        # but which axis keeps the surviving negative depends on the order the
+        # pairs were consumed -- so two copies sharing one permutation could
+        # normalise differently and still look like distinct orientations.
+        # Shape 1 stalled at 8 strings that way, with "x->-x y->z z->y" and
+        # "x->x y->z z->-y" both surviving as the same permutation.
+        #
+        # Parity is the only invariant a pair-flip preserves, so it fixes how
+        # many negatives must remain: an even count reduces to 0, an odd count
+        # to exactly 1. Put that lone negative on the lowest-indexed axis every
+        # time and the representative is unique.
+        def flip(own):
+            r[world[own][0]][own] = -r[world[own][0]][own]
+
+        neg = [own for own in range(3) if r[world[own][0]][own] < 0]
+
+        # Parity is the only invariant a pair-flip preserves, so it fixes how
+        # many negatives survive: an even count reduces to 0, an odd count to
+        # exactly 1. The subtlety is WHICH axis keeps that lone negative.
+        #
+        # Keying on the own-axis index does not work: copies sharing one
+        # permutation map their own axes to different world axes, so "lowest
+        # own axis" picks differently for each and the representative is not
+        # unique. Shape 1 split 55/2 that way, one group holding the negative
+        # on own-x and the other on own-z.
+        #
+        # The world axis is what the copies of a permutation agree on, so
+        # choose by that: move the lone negative onto whichever own-axis maps
+        # to the LOWEST world axis. Moving it is itself a pair flip (clear it
+        # here, set it there), which keeps det = +1.
+        if len(neg) % 2 == 0:
+            for own in neg:
+                flip(own)
+        else:
+            target = min(range(3), key=lambda own: world[own][0])
+            for own in neg:
+                if own != target:
+                    flip(own)
+            if r[world[target][0]][target] > 0:
+                flip(target)
+    return (cdims, r)
+
+
+def orientation_label(rot):
+    """Readable form of a rotation, e.g. "x->y y->-z z->x".
+
+    Picks the DOMINANT entry in each column, not the first non-zero one.
+    A box rotation is a signed permutation, so any non-zero entry is the right
+    one and either rule works. A prism's rotation is not: its columns are the
+    cap basis and sweep axis, which carry the de-tilt residue as off-axis
+    components around 7e-4. "First non-zero" then latches onto that noise and
+    reports impossible labels -- every prism came out as "x->x y->-x z->-x",
+    three axes all mapped to x, while the matrices themselves were exact
+    (det = +1, orthonormal to 1e-13).
+    """
+    if not rot:
+        return ""
+    names = "xyz"
+    out = []
+    for own in range(3):
+        col = [rot[world][own] for world in range(3)]
+        order = sorted(range(3), key=lambda i: -abs(col[i]))
+        best, second = order[0], order[1]
+        # A 45 deg part has no permutation label: its axis lies BETWEEN two
+        # world axes, both components ~0.707, and picking the larger is then
+        # arbitrary -- it produced "x->x y->-x z->y" for solid 135, mapping two
+        # canonical axes onto the same world axis, which no rotation can do.
+        # Say so instead of inventing a permutation. r11..r33 still carry the
+        # exact rotation (det +1, orthonormal); only this readable form is
+        # undefined.
+        if abs(col[second]) > 0.5 * abs(col[best]):
+            return "oblique-45"
+        out.append("%s->%s%s" % (names[own],
+                                 "-" if col[best] < 0 else "",
+                                 names[best]))
+    return " ".join(out)
+
+
 def oblique(solid):
     """True if the solid keeps off-axis faces after the de-tilt (45 deg parts)."""
     for f in solid.Faces:
@@ -282,7 +844,10 @@ def classify(solid):
         BOX       6 planar faces, 3 square axes, volume == dx*dy*dz
         TUBE      2 coaxial cylinders + 2 caps, volume == annulus
         BOX_HOLE  planar block with cylindrical bores -> G4SubtractionSolid
-        PRISM     all-planar but not a box: wedges, chamfered blocks
+        PRISM     all-planar but not a box: wedges, chamfered blocks.
+                  Every one in this model is an extrusion, so the cap outline
+                  and sweep length are recovered -> G4ExtrudedSolid. See
+                  extrusion() and stm_prisms.csv.
         OTHER     anything left, reported so nothing is dropped in silence
 
     For this model the tally is 195 / 2 / 15 / 12 / 0.
@@ -304,27 +869,19 @@ def classify(solid):
                 c = FreeCAD.Vector(0, 0, 0)
                 for u, m in zip(axes, mids):
                     c = c + u * m
-                # Re-label the three measured lengths as dx/dy/dz by asking
-                # which world axis each of the solid's axes points along once
-                # transformed. Without this a rotated box would report its
-                # height as a width.
-                sx = sy = sz = None
-                for u, d in zip(axes, dims):
-                    n = transform_dir(u.x, u.y, u.z)
-                    if is_axis_aligned(n):
-                        k = max(range(3), key=lambda i: abs(n[i]))
-                        if k == 0:
-                            sx = d
-                        elif k == 1:
-                            sy = d
-                        else:
-                            sz = d
-                if None in (sx, sy, sz):
-                    # A 45 deg box has no axis to line up with, so report its
-                    # own-frame extents and let rotY45 flag the orientation.
-                    sx, sy, sz = dims
+                # Canonical frame: a plain box lies on its two longest sides
+                # with the shortest as its height in z. The rotation back to
+                # world comes from the same call, so dimensions and rotation
+                # cannot disagree.
+                # symmetric=True: a plain box maps onto itself under a 180 deg
+                # flip about any of its own axes, so the sign of each axis is
+                # not observable and is normalised away. BOX_HOLE below passes
+                # False -- its bores make the flips real.
+                cdims, rot = canonical_frame(axes, dims, longest_x=False,
+                                             symmetric=True)
                 return "BOX", {"pos": transform(c.x, c.y, c.z),
-                               "dx": sx, "dy": sy, "dz": sz}
+                               "dx": cdims[0], "dy": cdims[1], "dz": cdims[2],
+                               "rot": rot}
 
     # --- TUBE: inner and outer cylinder, two flat ends -------------------
     if surf == {"Cylinder", "Plane"} and len(cyls) == 2 and len(solid.Faces) == 4:
@@ -340,12 +897,99 @@ def classify(solid):
             annulus = math.pi * (radii[1] ** 2 - radii[0] ** 2) * length
             if annulus > 0 and abs(solid.Volume / annulus - 1.0) < TOL_VOL:
                 b = solid.BoundBox
+                axis = transform_dir(ax.x, ax.y, ax.z)
+                # A G4Tubs is built along ITS OWN z, so the placement rotation
+                # is whatever carries z onto the measured axis. Both tubes here
+                # lie exactly on world z (0.0000 deg), so that rotation is the
+                # identity -- but it was never recorded, and a blank r11..r33
+                # reached the emitter as "TODO: set by hand" on a solid whose
+                # orientation was never in doubt.
+                #
+                # Derived from the axis rather than assumed, so a tube mounted
+                # off-axis gets a real matrix instead of a false identity.
+                # Columns are where the tube's own x, y, z land in Mu2e.
+                zc = FreeCAD.Vector(*axis)
+                if zc.Length < 1e-9:
+                    rot = None
+                else:
+                    zc.normalize()
+                    # Any vector not parallel to the axis seeds the transverse
+                    # pair; which one is arbitrary, because a tube is a body of
+                    # revolution and spinning it about its own axis places the
+                    # same material.
+                    seed = FreeCAD.Vector(1, 0, 0)
+                    if abs(seed.dot(zc)) > 0.9:
+                        seed = FreeCAD.Vector(0, 1, 0)
+                    xc = seed.sub(zc * seed.dot(zc))
+                    xc.normalize()
+                    yc = zc.cross(xc)          # right-handed: det = +1
+                    rot = [[xc[k], yc[k], zc[k]] for k in range(3)]
                 return "TUBE", {"pos": transform(b.Center.x, b.Center.y, b.Center.z),
                                 "rmin": radii[0], "rmax": radii[1], "dz": length,
                                 # Report the enclosing extents too, so the shape
                                 # key and the colour lookup see real sizes.
                                 "dx": 2.0 * radii[1], "dy": 2.0 * radii[1],
-                                "axis": transform_dir(ax.x, ax.y, ax.z)}
+                                "rot": rot,
+                                "axis": axis}
+
+    # --- PRISM_HOLE: a bored block whose outline is not a rectangle ------
+    #
+    # Caught BEFORE BOX_HOLE, and only when orthogonal_frame() has already
+    # failed, so nothing that BOX_HOLE handles correctly is diverted here.
+    #
+    # These are the solids BOX_HOLE was describing with its bounding box: a
+    # block with one end cut at 45 deg, drilled through. Calling that a cuboid
+    # overstated solid 162 by 12.66% of its volume, and since no orthogonal
+    # frame exists it also got no rotation -- so the CSV could not place it and
+    # the verifier skipped it. Swept outline plus bores is what it actually is,
+    # and G4ExtrudedSolid minus G4Tubs is how Geant4 builds it.
+    if cyls and "Plane" in surf and orthogonal_frame(solid) is None:
+        ext = extrusion(solid, planar_only=True,
+                        ref_volume=solid.Volume + bore_volume(solid))
+        if ext is not None:
+            u, w, ax = ext["prism_u"], ext["prism_w"], ext["prism_axis"]
+            # Same frame convention as PRISM: cap in x,y and sweep along z,
+            # which is the frame G4ExtrudedSolid builds in.
+            rot = [[u[k], w[k], ax[k]] for k in range(3)]
+            anchor = ext["prism_anchor"]
+            us = [p[0] for p in ext["prism_outline"]]
+            vs = [p[1] for p in ext["prism_outline"]]
+            params = dict(ext)
+            params["pos"] = anchor
+            params["rot"] = rot
+            params["dx"] = max(us) - min(us)
+            params["dy"] = max(vs) - min(vs)
+            params["dz"] = ext["prism_len"]
+            # Bores, in the prism's own frame. The offset is measured from the
+            # OUTLINE ANCHOR, not from the solid's centre, because that anchor
+            # is what pos names and what the outline's (0,0) sits on -- the
+            # same rule the PRISM branch follows. Measuring from the centre
+            # here would displace every hole by the anchor-to-centre vector.
+            bores = []
+            for f in cyls:
+                fax = f.Surface.Axis
+                pts = [v.Point for v in f.Vertexes]
+                if not pts:
+                    continue
+                pr = [p.x * fax.x + p.y * fax.y + p.z * fax.z for p in pts]
+                mid = (max(pr) + min(pr)) / 2.0
+                depth = max(pr) - min(pr)
+                c = f.Surface.Center
+                off = mid - (c.x * fax.x + c.y * fax.y + c.z * fax.z)
+                world = transform(c.x + fax.x * off, c.y + fax.y * off,
+                                  c.z + fax.z * off)
+                rel_w = tuple(world[k] - anchor[k] for k in range(3))
+                axis_w = transform_dir(fax.x, fax.y, fax.z)
+                # R maps the prism frame to world and is orthonormal, so its
+                # transpose takes the world offset back into that frame.
+                rel = tuple(sum(rot[k][j] * rel_w[k] for k in range(3))
+                            for j in range(3))
+                axis_c = tuple(sum(rot[k][j] * axis_w[k] for k in range(3))
+                               for j in range(3))
+                bores.append({"r": f.Surface.Radius, "pos": world,
+                              "rel": rel, "depth": depth, "axis": axis_c})
+            params["bores"] = bores
+            return "PRISM_HOLE", params
 
     # --- BOX_HOLE: a block with bores drilled through it -----------------
     # Each cylinder becomes a G4Tubs to subtract. The outer size falls back to
@@ -353,27 +997,132 @@ def classify(solid):
     # axis-aligned once de-tilted; a 45 deg one is flagged by rotY45.
     if cyls and "Plane" in surf:
         b = solid.BoundBox
+        centre = transform(b.Center.x, b.Center.y, b.Center.z)
+
+        # Fix the canonical frame BEFORE measuring the bores: each bore's
+        # offset is expressed in that frame, so the rotation has to exist
+        # first. Bored blocks are built along their bore axis, so the longest
+        # extent goes on x. A block with no clean orthogonal frame keeps its
+        # bounding-box extents and gets no rotation, which is reported rather
+        # than guessed at.
+        _axes = orthogonal_frame(solid)
+        if _axes is not None:
+            _dims, _mids = extents_along(solid, _axes)
+            _cdims, _rot = canonical_frame(_axes, _dims, longest_x=True)
+        else:
+            _cdims, _rot = ([b.XLength, b.YLength, b.ZLength], None)
+
         bores = []
         for f in cyls:
+            # A cylindrical face's Surface.Center is a point on the axis, NOT
+            # the centre of the drilled hole: OCC puts it at the surface's
+            # parametric origin, which can sit far outside the block. Taking it
+            # as the bore position put 19 of 32 bores outside their own solid.
+            #
+            # Project the face's own vertices onto its axis instead and take the
+            # midpoint of that span: that is the centre of the actual hole, and
+            # it lies on the block by construction.
+            ax = f.Surface.Axis
+            pts = [v.Point for v in f.Vertexes]
+            if pts:
+                pr = [p.x * ax.x + p.y * ax.y + p.z * ax.z for p in pts]
+                mid = (max(pr) + min(pr)) / 2.0
+                depth = max(pr) - min(pr)
+            else:
+                # A full cylinder can have no vertices; fall back to the
+                # bounding box centre projected onto the axis.
+                fb = f.BoundBox
+                mid = (fb.Center.x * ax.x + fb.Center.y * ax.y
+                       + fb.Center.z * ax.z)
+                depth = 0.0
             c = f.Surface.Center
+            # Slide the surface origin along the axis to the hole's midpoint.
+            off = mid - (c.x * ax.x + c.y * ax.y + c.z * ax.z)
+            cx = c.x + ax.x * off
+            cy = c.y + ax.y * off
+            cz = c.z + ax.z * off
+            world = transform(cx, cy, cz)
+            # Position relative to the block centre, expressed in the SHAPE'S
+            # CANONICAL FRAME -- not in world axes.
+            #
+            # A bore belongs to the shape, not to the world: the 146 identical
+            # bricks share one definition, so an absolute position is
+            # meaningless for every placement but the one it was measured
+            # from. That much was already true. What changed is that dx/dy/dz
+            # are now canonical (longest extent on x for a bored block), so a
+            # world-frame offset no longer indexes the box it is subtracted
+            # from: 11 of 32 bores landed outside their own block.
+            #
+            # Rotating the offset by R-transpose (R maps canonical -> world,
+            # and R is orthonormal so its transpose is its inverse) puts the
+            # bore back in the frame the box is built in. The axis goes through
+            # the same rotation, or a bore would be drilled along the wrong
+            # edge once the block is turned.
+            rel_w = (world[0] - centre[0], world[1] - centre[1],
+                     world[2] - centre[2])
+            axis_w = transform_dir(ax.x, ax.y, ax.z)
+            if _rot is not None:
+                rel = tuple(sum(_rot[k][j] * rel_w[k] for k in range(3))
+                            for j in range(3))
+                axis_c = tuple(sum(_rot[k][j] * axis_w[k] for k in range(3))
+                               for j in range(3))
+            else:
+                rel, axis_c = rel_w, axis_w
             bores.append({"r": f.Surface.Radius,
-                          "pos": transform(c.x, c.y, c.z),
-                          "axis": transform_dir(f.Surface.Axis.x,
-                                                f.Surface.Axis.y,
-                                                f.Surface.Axis.z)})
-        return "BOX_HOLE", {"pos": transform(b.Center.x, b.Center.y, b.Center.z),
-                            "dx": b.XLength, "dy": b.YLength, "dz": b.ZLength,
+                          "pos": world,
+                          "rel": rel,
+                          "depth": depth,
+                          "axis": axis_c})
+        # dx/dy/dz ARE the canonical extents -- not the bounding box. Carrying
+        # both invites the shape row and the rotation to disagree, which is the
+        # failure this rework exists to remove. The bbox is still available to
+        # anything that wants it via the STEP itself.
+        return "BOX_HOLE", {"pos": centre, "rot": _rot,
+                            "dx": _cdims[0], "dy": _cdims[1], "dz": _cdims[2],
                             "bores": bores}
 
     # --- PRISM / OTHER ---------------------------------------------------
-    # Planar but not box-like: wedges, chamfered and skewed blocks. These need
-    # G4Trap, G4GenericTrap or G4ExtrudedSolid and are left for a human to
-    # decide, so only their envelope is reported. Nothing in this model falls
-    # through to OTHER.
+    # Planar but not box-like: wedges and chamfered blocks. Every one of these
+    # in the model is an EXTRUSION -- two congruent parallel caps joined by
+    # walls parallel to the axis -- which is exactly G4ExtrudedSolid's model, so
+    # the cap polygon and the extrusion length are recovered here rather than
+    # leaving a human to re-derive them from the CAD.
     b = solid.BoundBox
     kind = "PRISM" if surf == {"Plane"} else "OTHER"
-    return kind, {"pos": transform(b.Center.x, b.Center.y, b.Center.z),
-                  "dx": b.XLength, "dy": b.YLength, "dz": b.ZLength}
+    params = {"pos": transform(b.Center.x, b.Center.y, b.Center.z),
+              "dx": b.XLength, "dy": b.YLength, "dz": b.ZLength}
+    if kind == "PRISM":
+        ext = extrusion(solid)
+        if ext is not None:
+            params.update(ext)
+            # A prism is NOT oblique just because its faces are not world-
+            # aligned. extrusion() already recovers a complete orthonormal
+            # right-handed frame -- the cap's in-plane basis u, w and the sweep
+            # axis -- verified for all 11 prisms: |u|=|w|=|axis|=1, mutual dots
+            # below 1e-13, det = +1 exactly.
+            #
+            # That frame IS the canonical one, and it matches the convention
+            # G4ExtrudedSolid needs: the cap polygon lies in x,y and the sweep
+            # runs along z. So u->x, w->y, axis->z, and the rotation taking
+            # that frame to Mu2e axes is simply those three vectors as COLUMNS
+            # (column j is where canonical axis j lands).
+            #
+            # Without this every prism was reported oblique and emitted with a
+            # nullptr rotation, when its orientation was fully determined all
+            # along.
+            u, w, ax = ext["prism_u"], ext["prism_w"], ext["prism_axis"]
+            params["rot"] = [[u[k], w[k], ax[k]] for k in range(3)]
+            # The outline is anchored on a vertex, so the placement must name
+            # that same point. Leaving pos at the bounding-box centre put every
+            # prism ~350 mm from where it belongs.
+            params["pos"] = ext["prism_anchor"]
+            # Canonical extents: the cap's span in u and v, and the sweep.
+            us = [p[0] for p in ext["prism_outline"]]
+            vs = [p[1] for p in ext["prism_outline"]]
+            params["dx"] = max(us) - min(us)
+            params["dy"] = max(vs) - min(vs)
+            params["dz"] = ext["prism_len"]
+    return kind, params
 
 
 def shape_key(solid, kind, p):
@@ -396,7 +1145,51 @@ def shape_key(solid, kind, p):
     dims = tuple(sorted(round(v, 2) for v in
                         (p.get("dx", 0.0), p.get("dy", 0.0), p.get("dz", 0.0))))
     radii = tuple(sorted({round(f.Surface.Radius, 3) for f in cylinders(solid)}))
-    return (kind, sig, dims, radii, round(solid.Volume, 1))
+
+    # WHERE the bores sit, not just how big they are. Two blocks drilled in
+    # different places have the same outside size, the same radii and the same
+    # VOLUME -- the holes are identical, only their positions differ -- so
+    # without this they merge and every copy inherits the first one's hole
+    # pattern. Shape 9 was the case: solids 200 and 222 would have been built
+    # with solid 43's bores, 203 mm from where they belong. Their principal
+    # moments of inertia differ by 7%, which is what proves they are genuinely
+    # different parts rather than one part measured from the other end.
+    #
+    # Measured in the solid's OWN frame, as unsigned distances from its centre,
+    # so the key stays free of position and orientation: a brick turned
+    # end-for-end still matches itself, while a brick drilled elsewhere does
+    # not.
+    bores = tuple(sorted(bore_offsets(solid)))
+    return (kind, sig, dims, radii, bores, round(solid.Volume, 1))
+
+
+def bore_offsets(solid):
+    """Each bore's distance from the solid's centre along its own axes.
+
+    Unsigned, because the sign depends on which end of the block the frame
+    happens to point at, and that is genuinely arbitrary -- it is the only part
+    of the offset a rotation can change for an axis-aligned part.
+
+    Rounded to the NEAREST MILLIMETRE, not to a fraction of one. The de-tilt
+    leaves a few hundredths of a millimetre of scatter on every measurement,
+    so a finer quantisation splits identical parts: solids 6 and 108 read 9.53
+    against 9.52 and were filed as different shapes, when a boolean test shows
+    them overlapping to 100.000000%. A whole millimetre is far below the
+    spacing of genuinely different hole patterns -- shape 9's two patterns are
+    203 mm apart -- and far above the noise.
+    """
+    axes = orthogonal_frame(solid)
+    cyls = cylinders(solid)
+    if axes is None or not cyls:
+        return []
+    c = solid.BoundBox.Center
+    out = []
+    for f in cyls:
+        cc = f.Surface.Center
+        d = FreeCAD.Vector(cc.x - c.x, cc.y - c.y, cc.z - c.z)
+        out.append(tuple(sorted(round(abs(d.dot(u))) for u in axes))
+                   + (round(f.Surface.Radius, 1),))
+    return out
 
 
 # ----------------------------------------------------------------- material
@@ -740,7 +1533,18 @@ def main():
                      for a in range(3)) if len(pts) > 1 else 0.0
 
         name = suggest_name(g["kind"], p, colour, n, len(g["members"]), spread)
-        shape_rows.append({
+
+        # dx/dy/dz are the SOLID's dimensions for a box, a bored box or a tube.
+        # For a prism they would be the bounding envelope, which is not the
+        # shape: the solid is a swept polygon that fills only part of that box,
+        # and reading the envelope as a G4Box overstates it (shape 19 is a
+        # wedge of 2903 mm^2 cap area inside a 76 x 152 x 76 envelope, so a box
+        # would be twice the material). The envelope stays available from the
+        # placements and from stm_prisms.csv, so nothing is lost by leaving
+        # these blank; what is gained is that the columns cannot be mistaken
+        # for a buildable size.
+        is_prism = "prism_outline" in p
+        row = {
             "shape_id": n,
             "type": g["kind"],
             "count": len(g["members"]),
@@ -748,23 +1552,54 @@ def main():
             "material": colour,
             "material_hint": COLOUR_HINT.get(colour, ""),
             "material_src": how,
-            "dx": round(dims[0], 3),
-            "dy": round(dims[1], 3),
-            "dz": round(dims[2], 3),
+            "dx": "" if is_prism else round(dims[0], 3),
+            "dy": "" if is_prism else round(dims[1], 3),
+            "dz": "" if is_prism else round(dims[2], 3),
             "rmin": round(p["rmin"], 3) if "rmin" in p else "",
             "rmax": round(p["rmax"], 3) if "rmax" in p else "",
             "nbores": len(p.get("bores", [])) or "",
             "rotY45": "yes" if g["oblique"] else "",
-            "in_x": round(dims[0] / 25.4, 3),
-            "in_y": round(dims[1] / 25.4, 3),
-            "in_z": round(dims[2] / 25.4, 3),
-        })
+            "in_x": "" if is_prism else round(dims[0] / 25.4, 3),
+            "in_y": "" if is_prism else round(dims[1] / 25.4, 3),
+            "in_z": "" if is_prism else round(dims[2] / 25.4, 3),
+            # The prism's own defining numbers, so this row is self-contained:
+            # a cap of this area swept this far, with the outline in
+            # stm_prisms.csv. Blank for every other kind.
+            "cap_area": round(p["prism_area"], 3) if is_prism else "",
+            "sweep_len": round(p["prism_len"], 3) if is_prism else "",
+            "cap_verts": len(p["prism_outline"]) if is_prism else "",
+        }
+        # A PRISM that failed the extrusion test keeps its envelope, since that
+        # is genuinely all that is known about it. Nothing in this model does,
+        # but a future export might, and silently blanking the only dimensions
+        # available would hide the part rather than describe it.
+        if g["kind"] in ("PRISM", "OTHER") and not is_prism:
+            row["dx"] = round(dims[0], 3)
+            row["dy"] = round(dims[1], 3)
+            row["dz"] = round(dims[2], 3)
+            row["in_x"] = round(dims[0] / 25.4, 3)
+            row["in_y"] = round(dims[1] / 25.4, 3)
+            row["in_z"] = round(dims[2] / 25.4, 3)
+        shape_rows.append(row)
 
     # One row per solid: where each block goes, in Mu2e coordinates relative
     # to _STMShieldingRef, plus its bores if it has any.
     place_rows = []
     for i, key, p, s in placements:
         x, y, z = p["pos"]
+        # Orientation of this copy, as a 3x3 rotation taking the shape's own
+        # frame to Mu2e axes. Without it the CSVs are not self-contained: two
+        # copies of one shape can sit at right angles and differ in no recorded
+        # column, so a consumer cannot place either. Shape 1 has 13 distinct
+        # orientations across its 146 copies.
+        # The rotation the CLASSIFIER computed, alongside the canonical
+        # dimensions it reported. Re-deriving it here from the solid's face
+        # normals -- which is what solid_orientation() did -- produced a
+        # rotation relative to the solid's own axis ORDER while dx/dy/dz were
+        # ordered canonically, so composing the two double-counted the
+        # orientation. Reading it from the same call that fixed the frame is
+        # what keeps them consistent.
+        rot = p.get("rot")
         place_rows.append({
             "solid_id": i,
             "shape_id": order[key],
@@ -772,6 +1607,15 @@ def main():
             "x": round(x, 3),
             "y": round(y, 3),
             "z": round(z, 3),
+            # Row-major 3x3: world_axis = sum_j r{row}{col} * own_axis.
+            # "" for a solid with no axis-aligned orientation (a wedge, or a
+            # 45 deg part) -- reported rather than guessed at.
+            "r11": rot[0][0] if rot else "", "r12": rot[0][1] if rot else "",
+            "r13": rot[0][2] if rot else "", "r21": rot[1][0] if rot else "",
+            "r22": rot[1][1] if rot else "", "r23": rot[1][2] if rot else "",
+            "r31": rot[2][0] if rot else "", "r32": rot[2][1] if rot else "",
+            "r33": rot[2][2] if rot else "",
+            "orientation": orientation_label(rot),
             "rotY45": "yes" if oblique(s) else "",
             "volume": round(s.Volume, 1),
             # Overlap with the full-assembly part the material came from.
@@ -784,12 +1628,62 @@ def main():
                 "solid_id": i,
                 "shape_id": order[key],
                 "r": round(b["r"], 3),
+                # Position RELATIVE to the block centre: this is what a
+                # G4SubtractionSolid needs, and unlike an absolute position it
+                # is valid for every placement of the shape, not just the one
+                # the bore happened to be measured from.
+                "dx": round(b["rel"][0], 3),
+                "dy": round(b["rel"][1], 3),
+                "dz": round(b["rel"][2], 3),
+                "depth": round(b["depth"], 3),
+                # Absolute Mu2e position too, for cross-checking against the
+                # CAD. Derived, not authoritative: dx/dy/dz are the definition.
                 "x": round(b["pos"][0], 3),
                 "y": round(b["pos"][1], 3),
                 "z": round(b["pos"][2], 3),
                 "ax": round(b["axis"][0], 4),
                 "ay": round(b["axis"][1], 4),
                 "az": round(b["axis"][2], 4),
+            })
+
+    # One row per vertex of every prism's cap outline, in order. Together with
+    # the axis and length this is a complete G4ExtrudedSolid: the CSVs no longer
+    # stop at a bounding envelope for these parts.
+    prism_rows = []
+    for key, g in groups.items():
+        p = g["p"]
+        if "prism_outline" not in p:
+            continue
+        n = order[key]
+        ax = p["prism_axis"]
+        u = p["prism_u"]
+        w = p["prism_w"]
+        for seq, (a, b2) in enumerate(p["prism_outline"]):
+            prism_rows.append({
+                "shape_id": n,
+                "seq": seq,
+                # Cap outline in the cap's own plane, mm. Sweep this polygon
+                # along prism_axis for prism_len to rebuild the solid.
+                "u": a,
+                "v": b2,
+                "len": round(p["prism_len"], 3),
+                "area": round(p["prism_area"], 3),
+                # The cap plane's basis and the sweep direction, in Mu2e
+                # coordinates, so the 2D outline can be placed in 3D.
+                # 10 decimal places, not the 4 used elsewhere. These are unit
+                # vectors multiplied by an arm of up to ~250 mm, so a rounding
+                # of 1e-4 rad displaces a rebuilt vertex by ~0.025 mm. At 1e-10
+                # the round-trip is limited by the outline and position columns
+                # instead, i.e. by real geometry rather than by formatting.
+                "axis_x": round(ax[0], 10),
+                "axis_y": round(ax[1], 10),
+                "axis_z": round(ax[2], 10),
+                "u_x": round(u[0], 10),
+                "u_y": round(u[1], 10),
+                "u_z": round(u[2], 10),
+                "w_x": round(w[0], 10),
+                "w_y": round(w[1], 10),
+                "w_z": round(w[2], 10),
             })
 
     def write(path, rows):
@@ -805,6 +1699,8 @@ def main():
     write(os.path.join(OUTDIR, "stm_placements.csv"), place_rows)
     if bores:
         write(os.path.join(OUTDIR, "stm_bores.csv"), bores)
+    if prism_rows:
+        write(os.path.join(OUTDIR, "stm_prisms.csv"), prism_rows)
 
     print()
     print("classification:")

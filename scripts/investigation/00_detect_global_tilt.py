@@ -1,46 +1,67 @@
 """
-Detect whether a STEP export carries a spurious global rotation about z.
+Detect whether a STEP export carries a spurious rotation about z, and whether
+it applies to the whole model or only to some solids.
 
     "C:/Program Files/FreeCAD 1.1/bin/python.exe" scripts/investigation/00_detect_global_tilt.py [file.stp]
 
-Writes nothing. This is a diagnostic: run it FIRST on any new geometry, before
+Writes output/tilt.json when -- and only when -- a single global angle is
+actually correct for the model. Run this FIRST on any new geometry, before
 trusting a single dimension out of it.
 
 Why this exists
-    The Mu2e STM export carries a 0.041591 deg rotation about z that is not real
-    -- it is an artefact of the NX export. Left in place it corrupts every
-    world-aligned measurement: a 50.800 mm face reads 51.095, and for the 45 deg
-    solids a bounding box overstates the volume threefold. The extractor removes
-    it (TILT_DEG in extract_stm_geometry.py) and measures in each solid's own
-    frame instead.
+    The Mu2e STM export carries a 0.041591 deg rotation about z that is not
+    real -- an artefact of the NX export. Left in place it corrupts every
+    world-aligned measurement: a 50.800 mm face reads 51.095, and for the 45
+    deg solids a bounding box overstates the volume threefold.
 
-    A future geometry may have no such tilt, a different one, or genuinely
-    rotated parts that must NOT be removed. This script tells the three apart.
+    But the tilt is NOT global. In this model 208 of 224 solids carry it and 12
+    are already square in the CAD -- among them the SSC cluster on the beamline.
+    De-rotating all 224 fixes the 208 and rotates the 12 off their axes,
+    introducing the very error it removes elsewhere.
 
-The method
-    Step 1, detect. Take every planar face normal, drop the ones pointing along
-    z (a rotation about z leaves them untouched, so they carry no information),
-    and reduce each to its angle mod 90 deg. Box faces in a clean export all
-    land on 0.0000. Anything else is a shared rotation.
+    So the first question is not "what is the angle" but "which solids have
+    it". This script answers that before it answers anything else.
 
-    Step 2, validate. De-rotate by the candidate angle and count the planar
-    faces that still fail to lie on an axis. A correct angle leaves only the
-    genuinely oblique features; a wrong one leaves hundreds.
+The method, in order
+    Step 1, candidate angle. Take every planar face normal, drop the ones
+    pointing along z (a rotation about z leaves them untouched, so they carry
+    no information), and reduce each to its deviation from the nearest axis
+    mod 90 deg. The off-axis faces' shared value is the candidate.
 
-Reading the histogram -- this is the part that matters
-    ONE TIGHT CLUSTER AT A NON-ZERO ANGLE
-        A global export error. One value shared by every part cannot arise from
-        parts that were each placed by hand. Remove it.
-    A SPIKE AT 0.0000 PLUS A FEW OUTLIERS
-        A clean export with real angled features (45 deg brackets and the like).
-        Remove nothing.
-    SCATTER ACROSS MANY UNRELATED ANGLES
-        The parts really are rotated with respect to each other. Remove nothing;
-        there is no single frame to recover, and each solid must be measured in
-        its own.
+    Step 2, PER SOLID. Classify each solid on its own normals: square, tilted,
+    oblique or indeterminate. This is the step a pooled histogram cannot do,
+    and it is why the earlier version of this script missed the split: "every
+    solid tilted by X" and "most solids tilted by X, some square" produce the
+    same single tight cluster when the faces are averaged together.
 
-    The discriminator is not the value, it is whether the model agrees on ONE
-    value. That is why the script prints the spread and not just the median.
+    Step 3, validate. De-rotate by the candidate and count the planar faces
+    still off-axis. A correct angle leaves only the genuinely oblique features.
+
+Reading the verdict
+    PIECEWISE TILT
+        Some solids tilted, some square. A single rotation is wrong: de-tilt
+        per solid, leaving the square ones alone. No tilt.json is written,
+        because handing one global angle to the extractor is what causes the
+        damage. Cross-check the split against the full assembly first -- if
+        both files agree solid-for-solid it is real CAD structure.
+    GLOBAL EXPORT TILT
+        Every judgeable solid carries the same angle. One rotation is correct;
+        tilt.json is written for the extractor.
+    CLEAN
+        Everything already on axis. Remove nothing.
+    NO SINGLE TILT
+        Off-axis angles scatter over degrees: the parts are genuinely rotated
+        with respect to one another and there is no shared frame to recover.
+
+    The discriminator is never the value alone. It is whether the solids agree
+    -- which is why the per-solid table is printed above the verdict.
+
+Why the damage is easy to miss
+    2x the tilt displaces a unit normal by ~1e-6, far inside a 1e-4 axis-
+    alignment test, and the box paths use bounding-box dimensions rather than
+    the direction vectors. A wrong de-tilt therefore shows up only where a
+    transformed direction reaches an output file -- bore axes and prism basis
+    vectors -- long after the positions have been silently shifted.
 
 A caution on precision
     For this model the constant was taken from a single face -- atan2 of one
@@ -66,7 +87,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 OUTDIR = os.path.join(ROOT, "output")
 DEFAULT = os.path.join(ROOT, "STM_STP_files",
-                       "F10269585--_1-G4 Shield House Simplified.stp")
+                       "F10269585--_1-G4 Shield House_2.stp")
 
 # A normal this close to +/-z tells us nothing about a rotation about z.
 Z_CUT = 0.99
@@ -152,6 +173,195 @@ def residue(normals, tilt_deg):
     return bad
 
 
+def solid_state(solid, tilt_deg):
+    """How this ONE solid sits: 'square', 'tilted', 'oblique' or 'z-parallel'.
+
+    Judged on the solid's own in-plane normals, independently of every other
+    solid. That independence is the whole point: a pooled histogram averages
+    the populations together and reports a single global tilt even when the
+    model does not have one.
+
+        square      every in-plane normal already on an axis
+        tilted      every in-plane normal at tilt_deg from an axis
+        oblique     carries some other angle (genuine 45 deg features)
+        z-parallel  every direction on the solid is parallel to z, so a
+                    rotation ABOUT z maps each of them to itself and the
+                    solid's own geometry cannot say whether it was rotated
+
+    'z-parallel' is a statement about what is observable, not a measurement.
+    The two tubes are the case: both cylinder axes and both cap normals have
+    an in-plane component of 6e-17 or exactly 0. Classifying them on their
+    sweep would return 'square' every time as an artefact of that axis being
+    the rotation axis -- a confident-looking non-answer. mating_bore_state()
+    below infers their real state from what they are seated in instead.
+    """
+    devs = set()
+    for f in solid.Faces:
+        if f.Surface.__class__.__name__ != "Plane":
+            continue
+        n = f.normalAt(0, 0)
+        n.normalize()
+        if abs(n.z) > Z_CUT:
+            continue
+        devs.add(deviation(math.degrees(math.atan2(n.y, n.x)) % 90.0))
+    if not devs:
+        return "z-parallel"
+    on = [d for d in devs if d <= ONAXIS_DEG]
+    at = [d for d in devs if abs(d - tilt_deg) <= AGREE_DEG]
+    other = [d for d in devs if d > ONAXIS_DEG and abs(d - tilt_deg) > AGREE_DEG]
+    if other:
+        return "oblique"
+    if on and not at:
+        return "square"
+    if at and not on:
+        return "tilted"
+    return "mixed"
+
+
+# How close two axes must be, in mm, to count as one seated in the other.
+# Loose on purpose: most neighbours here sit 0.5-0.93 mm off, so this is
+# "collinear within a millimetre", not a precision fit.
+MATE_PERP_TOL = 2.0
+
+
+def mating_bore_state(solids, index, states):
+    """State of a z-parallel solid, inferred from the bores it sits in.
+
+    A z-parallel solid cannot be judged on its own faces, but it is not
+    floating free: both tubes here run through bores in the surrounding walls,
+    and a tube seated in a tilted wall's bore is tilted with it.
+
+    So: find every cylindrical face elsewhere that is collinear with this
+    solid's own axis, and report the state of those solids if they agree.
+    Returns (state, note) or (None, reason) when nothing can be concluded.
+
+    This is an INFERENCE from mating geometry, never a measurement of the
+    solid, which is why the caller records it with by="mating-bore". The
+    offsets are also loose -- most neighbours here sit 0.5-0.93 mm off, so
+    "collinear within MATE_PERP_TOL" is the honest reading, not a precision
+    fit. Only solid 222 seats tube 157 at 0.00000 mm.
+    """
+    me = solids[index]
+    cyl = [f for f in me.Faces if f.Surface.__class__.__name__ == "Cylinder"]
+    if not cyl:
+        return None, "no cylindrical face to match on"
+    axis = cyl[0].Surface.Axis
+    origin = cyl[0].Surface.Center
+    bb = me.BoundBox
+
+    seen = {}
+    for j, s in enumerate(solids):
+        if j == index:
+            continue
+        b = s.BoundBox
+        if (b.XMin > bb.XMax + 5 or b.XMax < bb.XMin - 5
+                or b.YMin > bb.YMax + 5 or b.YMax < bb.YMin - 5
+                or b.ZMin > bb.ZMax + 5 or b.ZMax < bb.ZMin - 5):
+            continue
+        for f in s.Faces:
+            if f.Surface.__class__.__name__ != "Cylinder":
+                continue
+            fa = f.Surface.Axis
+            if abs(abs(fa.dot(axis)) - 1.0) > 1e-6:
+                continue
+            fc = f.Surface.Center
+            d = FreeCAD.Vector(fc.x - origin.x, fc.y - origin.y,
+                               fc.z - origin.z)
+            if d.sub(axis * d.dot(axis)).Length <= MATE_PERP_TOL:
+                seen[j] = states.get(j)
+                break
+    if not seen:
+        return None, "not seated in any bore"
+
+    # 'mixed' counts as carrying the tilt: such a solid straddles the split.
+    kinds = {st for st in seen.values() if st is not None}
+    if kinds <= {"tilted", "mixed"} and kinds:
+        return "tilted", "seated in %d bore(s), all tilted" % len(seen)
+    if kinds == {"square"}:
+        return "square", "seated in %d bore(s), all square" % len(seen)
+    return None, "seated in bores of mixed state: %s" % ", ".join(sorted(kinds))
+
+
+def per_solid_report(shape, tilt_deg):
+    """Classify every solid and print the table. Returns {state: [indices]}.
+
+    This runs BEFORE any global verdict, because whether a single angle is
+    even meaningful depends on the answer. A model where every solid is
+    'tilted' has a global tilt; one that splits into 'tilted' and 'square'
+    has a per-solid tilt, and de-rotating all of it corrupts the square parts.
+    """
+    solids = shape.Solids
+    groups = collections.defaultdict(list)
+    rows = []
+
+    # Pass 1: every solid on its own faces.
+    own = {}
+    for i, s in enumerate(solids):
+        own[i] = solid_state(s, tilt_deg)
+
+    # Pass 2: a z-parallel solid has no usable faces, so ask what it is seated
+    # in. Runs second because it reads pass 1's verdicts for the neighbours.
+    inferred = {}
+    for i, st in own.items():
+        if st != "z-parallel":
+            continue
+        got, why = mating_bore_state(solids, i, own)
+        if got is not None:
+            inferred[i] = (got, why)
+
+    for i, s in enumerate(solids):
+        st = own[i]
+        by = "face-normals"
+        note = None
+        if i in inferred:
+            st, note = inferred[i]
+            by = "mating-bore"
+        elif st == "z-parallel":
+            note = "every direction parallel to z; rotation about z unobservable"
+        groups[st].append(i)
+        b = s.BoundBox
+        # x/y/z, not cx/cy/cz: scripts/plot_tilt_state.py pairs each centre
+        # with its extent as r[k] and r["d" + k], so the names have to match.
+        rows.append({"i": i, "state": st,
+                     # How that state was reached: measured from the solid's
+                     # own face normals, or inferred from the bores it sits
+                     # in. A consumer that treats an inference as a
+                     # measurement would be wrong to, so say which.
+                     "by": by, "note": note,
+                     "x": round(b.Center.x, 3), "y": round(b.Center.y, 3),
+                     "z": round(b.Center.z, 3),
+                     "dx": round(b.XLength, 3), "dy": round(b.YLength, 3),
+                     "dz": round(b.ZLength, 3),
+                     "vol": round(s.Volume, 1)})
+
+    # Write the per-solid table, not just print it. A per-solid de-tilt needs to
+    # know WHICH solids to rotate, so this classification is data the rest of
+    # the chain consumes -- scripts/plot_tilt_state.py draws from it -- rather
+    # than something to re-derive by hand each time. Centres are CAD-frame here
+    # on purpose: this file describes the INPUT, before any transform.
+    os.makedirs(OUTDIR, exist_ok=True)
+    with open(os.path.join(OUTDIR, "tilt_state.json"), "w") as fh:
+        json.dump(rows, fh, indent=1)
+
+    total = len(shape.Solids)
+    print("=== per-solid tilt state (candidate %.6f deg) ===" % tilt_deg)
+    for state in ("tilted", "square", "oblique", "mixed", "z-parallel"):
+        ids = groups.get(state)
+        if not ids:
+            continue
+        shown = ", ".join(str(i) for i in ids[:10])
+        if len(ids) > 10:
+            shown += ", ... (%d more)" % (len(ids) - 10)
+        print("  %-11s %4d of %d   %s" % (state, len(ids), total, shown))
+    if inferred:
+        print("  (%d solid(s) classified from mating bores, not from their"
+              " own faces:)" % len(inferred))
+        for i in sorted(inferred):
+            st, why = inferred[i]
+            print("     solid %-4d -> %-8s  %s" % (i, st, why))
+    return groups
+
+
 def main():
     path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT
     print("reading", os.path.basename(path))
@@ -227,15 +437,57 @@ def main():
             if best is None or r < best[1]:
                 best = (sign * t, r)
 
-    print("\n=== verdict ===")
     t, r = best if best else (0.0, base)
+
+    # Classify each solid on its own BEFORE pronouncing on the model as a
+    # whole. A pooled histogram cannot tell "every solid is tilted by X" from
+    # "most solids are tilted by X and some are already square" -- both give
+    # one tight off-axis cluster. The difference decides whether a single
+    # global de-tilt is correct or actively destructive.
+    print()
+    # Always classify, even when nothing is off-axis. A clean model still owes
+    # the chain a tilt_state.json saying so -- "every solid square" is a
+    # result, not an absence of one, and plot_tilt_state.py needs the file
+    # either way. With no off-axis faces the candidate is 0.0, which makes
+    # every solid classify as 'square'.
+    groups = per_solid_report(shape, abs(t))
+    n_tilted = len(groups.get("tilted", []))
+    n_square = len(groups.get("square", []))
+    piecewise = bool(off) and n_tilted and n_square
+
+    print("\n=== verdict ===")
     if not off:
         print("  CLEAN. Every planar normal already lies on an axis;")
         print("  no de-tilt needed.")
+    elif piecewise:
+        print("  PIECEWISE TILT of %.15g deg -- NOT global." % abs(t))
+        print("  %d solids carry it, %d are already square in the CAD."
+              % (n_tilted, n_square))
+        print()
+        print("  A single de-tilt is WRONG for this model. It would correct")
+        print("  the %d tilted solids and rotate the %d square ones off their"
+              % (n_tilted, n_square))
+        print("  axes, introducing exactly the error it removes elsewhere.")
+        print("  The damage is easy to miss: %.15g deg displaces a unit normal"
+              % abs(t))
+        print("  by only %.2e, well inside a 1e-4 axis test, and box paths use"
+              % (1.0 - math.cos(math.radians(abs(t)))))
+        print("  bounding-box dimensions rather than the direction vectors.")
+        print("  It surfaces only where a transformed direction reaches an")
+        print("  output -- bore axes and prism basis vectors.")
+        print()
+        print("  De-tilt PER SOLID: apply the rotation to the tilted set only.")
+        print("  The square solids listed above must be left alone.")
+        print()
+        print("  Cross-check the split against the full assembly before")
+        print("  acting: if both files agree solid-for-solid, the split is")
+        print("  real CAD structure and not an artefact of simplification.")
     elif spread < AGREE_DEG:
         print("  GLOBAL EXPORT TILT of %.15g deg." % abs(t))
         print("  %d off-axis faces, and they agree on one angle to %.2e deg."
               % (len(off), spread))
+        print("  Every solid that can be judged carries it, so one rotation")
+        print("  is correct for the whole model.")
         print("  Parts placed by hand would not agree to that precision, so")
         print("  this is an artefact of the exporter, not real geometry.")
         print("  Removing it takes the off-axis count from %d to %d of %d"

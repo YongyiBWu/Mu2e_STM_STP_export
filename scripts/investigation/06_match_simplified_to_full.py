@@ -12,6 +12,14 @@ material data at all, so each of its solids has to be identified with a solid in
 the colour-coded full assembly. Both files are in the same CAD frame, so raw
 overlap is meaningful without any transform.
 
+Working in the untransformed CAD frame is what keeps this stage correct under a
+PIECEWISE tilt. The tilt is per solid, not global (208 of 224 tilted, 12 square
+-- stage 00), but each solid carries the same tilt state in BOTH files, so a
+solid and its counterpart are displaced identically and their boxes still
+overlap. Verified across all matched pairs: 207 tilted-to-tilted, 11
+square-to-square, zero disagreements. De-tilting either side before matching --
+globally or per solid -- would break that symmetry for no gain.
+
 Deliberately kernel-only -- no parsed coordinates anywhere -- so it is
 independent of the text-parsing path in 01. If the two disagreed, that would be
 a real signal rather than a shared bug.
@@ -36,7 +44,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 OUTDIR = os.path.join(ROOT, "output")
 SIMPLE = os.path.join(ROOT, "STM_STP_files",
-                      "F10269585--_1-G4 Shield House Simplified.stp")
+                      "F10269585--_1-G4 Shield House_2.stp")
 FULL = os.path.join(ROOT, "STM_STP_files", "F10258491--_1-Shield House Square.stp")
 
 t = time.time()

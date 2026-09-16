@@ -1,1 +1,12 @@
 *.stp
+__pycache__/
+*.pyc
+
+# Generated figures. Every PNG in this repo is produced by a script from the
+# CSVs and the STEP -- plots/, output/overlap/ and anything added later -- so
+# they are rebuildable and do not belong in history.
+#
+# plots/ stays listed separately: that whole directory is generated, not just
+# the images in it.
+*.png
+plots/

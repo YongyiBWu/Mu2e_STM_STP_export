@@ -1,0 +1,9 @@
+{
+ "tilt_deg": 0.04159144275763538,
+ "source": "F10269585_G4_Shield_House_3.stp",
+ "off_axis_faces": 915,
+ "agreement_deg": 1.8758328224066645e-12,
+ "residue_before": 927,
+ "residue_after": 56,
+ "planar_faces": 1362
+}

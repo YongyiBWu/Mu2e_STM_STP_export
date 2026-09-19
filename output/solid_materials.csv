@@ -1,0 +1,225 @@
+solid_id,label,material,source,cad_colour
+0,F10257043--_1-2416 Lead Brick_001,G4_Pb,label,granite gray
+1,F10256760--_1-248 Lead Brick_001,G4_Pb,label,granite gray
+2,F10256760--_1-248 Lead Brick_002,G4_Pb,label,granite gray
+3,F10256760--_1-248 Lead Brick_003,G4_Pb,label,granite gray
+4,F10256760--_1-248 Lead Brick_004,G4_Pb,label,granite gray
+5,F10256760--_1-248 Lead Brick_005,G4_Pb,label,granite gray
+6,F10258742--_1-Top Al sq walls_001,Al6061,label,medium steel
+7,F10257043--_1-2416 Lead Brick_002,G4_Pb,label,granite gray
+8,F10256760--_1-248 Lead Brick_006,G4_Pb,label,granite gray
+9,F10258530--_1-Left Cu Inner Sq_001,CollCu,label,medium maroon
+10,F10256760--_1-248 Lead Brick_007,G4_Pb,label,granite gray
+11,F10256760--_1-248 Lead Brick_008,G4_Pb,label,granite gray
+12,F10256760--_1-248 Lead Brick_009,G4_Pb,label,granite gray
+13,F10258498--_1-Poly Front Outer_001,BP,label+rule,strong ice
+14,F10256760--_1-248 Lead Brick_010,G4_Pb,label,granite gray
+15,F10256760--_1-248 Lead Brick_011,G4_Pb,label,granite gray
+16,F10257043--_1-2416 Lead Brick_003,G4_Pb,label,granite gray
+17,F10256760--_1-248 Lead Brick_012,G4_Pb,label,granite gray
+18,F10258764--_1-Poly Top Edge_001,BP,label+rule,medium steel
+19,F10256760--_1-248 Lead Brick_013,G4_Pb,label,granite gray
+20,F10256760--_1-248 Lead Brick_014,G4_Pb,label,granite gray
+21,F10256760--_1-248 Lead Brick_015,G4_Pb,label,granite gray
+22,F10256760--_1-248 Lead Brick_016,G4_Pb,label,granite gray
+23,F10258764--_1-Poly Top Edge_002,BP,label+rule,medium steel
+24,F10268506--_1-Poly Lead Block_001,Polyethylene,label+rule,medium steel
+25,F10256760--_1-248 Lead Brick_017,G4_Pb,label,granite gray
+26,F10256760--_1-248 Lead Brick_018,G4_Pb,label,granite gray
+27,F10256760--_1-248 Lead Brick_019,G4_Pb,label,granite gray
+28,F10258640--_1-BASE PLATE MACHINING_001,MildSteel,colour,silver gray
+29,F10268354--_1-SSC Tungsten Block_001,G4_W_Hayman,label,powder gray
+30,F10256760--_1-248 Lead Brick_020,G4_Pb,label,granite gray
+31,F10256760--_1-248 Lead Brick_021,G4_Pb,label,granite gray
+32,F10257043--_1-2416 Lead Brick_004,G4_Pb,label,granite gray
+33,F10256760--_1-248 Lead Brick_022,G4_Pb,label,granite gray
+34,F10257043--_1-2416 Lead Brick_005,G4_Pb,label,granite gray
+35,F10256760--_1-248 Lead Brick_023,G4_Pb,label,granite gray
+36,F10256760--_1-248 Lead Brick_024,G4_Pb,label,granite gray
+37,F10257043--_1-2416 Lead Brick_006,G4_Pb,label,granite gray
+38,F10256760--_1-248 Lead Brick_025,G4_Pb,label,granite gray
+39,F10257043--_1-2416 Lead Brick_007,G4_Pb,label,granite gray
+40,F10257043--_1-2416 Lead Brick_008,G4_Pb,label,granite gray
+41,F10256760--_1-248 Lead Brick_026,G4_Pb,label,granite gray
+42,F10256760--_1-248 Lead Brick_027,G4_Pb,label,granite gray
+43,F10257205--_1-SSC Hole Lead L_001,G4_Pb,label,granite gray
+44,F10256760--_1-248 Lead Brick_028,G4_Pb,label,granite gray
+45,F10257043--_1-2416 Lead Brick_009,G4_Pb,label,granite gray
+46,F10256760--_1-248 Lead Brick_029,G4_Pb,label,granite gray
+47,F10258954--_1-Steel SCC Blocks_001,Al6061,design,medium steel
+48,F10256760--_1-248 Lead Brick_030,G4_Pb,label,granite gray
+49,F10256760--_1-248 Lead Brick_031,G4_Pb,label,granite gray
+50,F10256760--_1-248 Lead Brick_032,G4_Pb,label,granite gray
+51,F10256760--_1-248 Lead Brick_033,G4_Pb,label,granite gray
+52,F10256760--_1-248 Lead Brick_034,G4_Pb,label,granite gray
+53,F10256760--_1-248 Lead Brick_035,G4_Pb,label,granite gray
+54,F10256760--_1-248 Lead Brick_036,G4_Pb,label,granite gray
+55,F10256760--_1-248 Lead Brick_037,G4_Pb,label,granite gray
+56,F10256760--_1-248 Lead Brick_038,G4_Pb,label,granite gray
+57,F10257043--_1-2416 Lead Brick_010,G4_Pb,label,granite gray
+58,F10256760--_1-248 Lead Brick_039,G4_Pb,label,granite gray
+59,F10256760--_1-248 Lead Brick_040,G4_Pb,label,granite gray
+60,F10256760--_1-248 Lead Brick_041,G4_Pb,label,granite gray
+61,F10256760--_1-248 Lead Brick_042,G4_Pb,label,granite gray
+62,F10256760--_1-248 Lead Brick_043,G4_Pb,label,granite gray
+63,F10256760--_1-248 Lead Brick_044,G4_Pb,label,granite gray
+64,F10256760--_1-248 Lead Brick_045,G4_Pb,label,granite gray
+65,F10256760--_1-248 Lead Brick_046,G4_Pb,label,granite gray
+66,F10256760--_1-248 Lead Brick_047,G4_Pb,label,granite gray
+67,F10257203--_1-SSC Poly_001,BP,label+rule,medium ice
+68,F10257203--_1-SSC Poly_002,BP,label+rule,medium ice
+69,F10257203--_1-SSC Poly_003,BP,label+rule,medium ice
+70,F10257203--_1-SSC Poly_004,BP,label+rule,medium ice
+71,F10259465--_1-Right Edge Poly_001,BP,label+rule,strong ice
+72,F10256760--_1-248 Lead Brick_048,G4_Pb,label,granite gray
+73,F10256760--_1-248 Lead Brick_049,G4_Pb,label,granite gray
+74,F10256760--_1-248 Lead Brick_050,G4_Pb,label,granite gray
+75,F10256946--_1-Right Cu 6in_001,CollCu,label,medium maroon
+76,F10256760--_1-248 Lead Brick_051,G4_Pb,label,granite gray
+77,F10256760--_1-248 Lead Brick_052,G4_Pb,label,granite gray
+78,F10256760--_1-248 Lead Brick_053,G4_Pb,label,granite gray
+79,F10256760--_1-248 Lead Brick_054,G4_Pb,label,granite gray
+80,F10256760--_1-248 Lead Brick_055,G4_Pb,label,granite gray
+81,F10256760--_1-248 Lead Brick_056,G4_Pb,label,granite gray
+82,F10256760--_1-248 Lead Brick_057,G4_Pb,label,granite gray
+83,F10256760--_1-248 Lead Brick_058,G4_Pb,label,granite gray
+84,F10256760--_1-248 Lead Brick_059,G4_Pb,label,granite gray
+85,F10256760--_1-248 Lead Brick_060,G4_Pb,label,granite gray
+86,F10256760--_1-248 Lead Brick_061,G4_Pb,label,granite gray
+87,F10258520--_1-Bot Square Poly_001,BP,label+rule,strong ice
+88,F10258520--_1-Bot Square Poly_002,BP,label+rule,strong ice
+89,F10256760--_1-248 Lead Brick_062,G4_Pb,label,granite gray
+90,F10256760--_1-248 Lead Brick_063,G4_Pb,label,granite gray
+91,F10256760--_1-248 Lead Brick_064,G4_Pb,label,granite gray
+92,F10256760--_1-248 Lead Brick_065,G4_Pb,label,granite gray
+93,F10256760--_1-248 Lead Brick_066,G4_Pb,label,granite gray
+94,F10256760--_1-248 Lead Brick_067,G4_Pb,label,granite gray
+95,F10256760--_1-248 Lead Brick_068,G4_Pb,label,granite gray
+96,F10256760--_1-248 Lead Brick_069,G4_Pb,label,granite gray
+97,F10256760--_1-248 Lead Brick_070,G4_Pb,label,granite gray
+98,F10256760--_1-248 Lead Brick_071,G4_Pb,label,granite gray
+99,F10257043--_1-2416 Lead Brick_011,G4_Pb,label,granite gray
+100,F10256760--_1-248 Lead Brick_072,G4_Pb,label,granite gray
+101,F10258500--_1-Poly Front Inner_001,BP,label+rule,strong ice
+102,F10256760--_1-248 Lead Brick_073,G4_Pb,label,granite gray
+103,F10256760--_1-248 Lead Brick_074,G4_Pb,label,granite gray
+104,F10256760--_1-248 Lead Brick_075,G4_Pb,label,granite gray
+105,F10256760--_1-248 Lead Brick_076,G4_Pb,label,granite gray
+106,F10256760--_1-248 Lead Brick_077,G4_Pb,label,granite gray
+107,F10256760--_1-248 Lead Brick_078,G4_Pb,label,granite gray
+108,F10260711--_1-Top Plate Holes_001,Al6061,design,medium steel
+109,F10257043--_1-2416 Lead Brick_012,G4_Pb,label,granite gray
+110,F10256760--_1-248 Lead Brick_079,G4_Pb,label,granite gray
+111,F10258769--_1-Left cu small inner_001,CollCu,label,medium maroon
+112,F10256760--_1-248 Lead Brick_080,G4_Pb,label,granite gray
+113,F10256760--_1-248 Lead Brick_081,G4_Pb,label,granite gray
+114,F10256760--_1-248 Lead Brick_082,G4_Pb,label,granite gray
+115,F10256760--_1-248 Lead Brick_083,G4_Pb,label,granite gray
+116,F10256760--_1-248 Lead Brick_084,G4_Pb,label,granite gray
+117,F10269769--_1-Top Poly right_001,BP,label+rule,medium steel
+118,F10261812--_1-Right Poly Outer Top_001,BP,label+rule,medium steel
+119,F10256760--_1-248 Lead Brick_085,G4_Pb,label,granite gray
+120,F10256760--_1-248 Lead Brick_086,G4_Pb,label,granite gray
+121,F10256760--_1-248 Lead Brick_087,G4_Pb,label,granite gray
+122,F10256760--_1-248 Lead Brick_088,G4_Pb,label,granite gray
+123,F10256760--_1-248 Lead Brick_089,G4_Pb,label,granite gray
+124,F10268504--_1-Poly Block Reduced_001,Polyethylene,label+rule,medium steel
+125,F10256760--_1-248 Lead Brick_090,G4_Pb,label,granite gray
+126,F10256760--_1-248 Lead Brick_091,G4_Pb,label,granite gray
+127,F10256760--_1-248 Lead Brick_092,G4_Pb,label,granite gray
+128,F10256760--_1-248 Lead Brick_093,G4_Pb,label,granite gray
+129,F10257043--_1-2416 Lead Brick_013,G4_Pb,label,granite gray
+130,F10256760--_1-248 Lead Brick_094,G4_Pb,label,granite gray
+131,F10256760--_1-248 Lead Brick_095,G4_Pb,label,granite gray
+132,F10256760--_1-248 Lead Brick_096,G4_Pb,label,granite gray
+133,F10256760--_1-248 Lead Brick_097,G4_Pb,label,granite gray
+134,F10256760--_1-248 Lead Brick_098,G4_Pb,label,granite gray
+135,F10258631--_1-Small Triangle Lead_001,G4_Pb,label,medium steel
+136,F10256760--_1-248 Lead Brick_099,G4_Pb,label,granite gray
+137,F10256760--_1-248 Lead Brick_100,G4_Pb,label,granite gray
+138,F10257043--_1-2416 Lead Brick_014,G4_Pb,label,granite gray
+139,F10256760--_1-248 Lead Brick_101,G4_Pb,label,granite gray
+140,F10256760--_1-248 Lead Brick_102,G4_Pb,label,granite gray
+141,F10256760--_1-248 Lead Brick_103,G4_Pb,label,granite gray
+142,F10258765--_1-Poly top front edge_001,BP,label+rule,medium steel
+143,F10258291--_1-Right Poly Longwall_001,BP,label+rule,strong ice
+144,F10256760--_1-248 Lead Brick_104,G4_Pb,label,granite gray
+145,F10258291--_1-Right Poly Longwall_002,BP,label+rule,strong ice
+146,F10256760--_1-248 Lead Brick_105,G4_Pb,label,granite gray
+147,F10256760--_1-248 Lead Brick_106,G4_Pb,label,granite gray
+148,F10256760--_1-248 Lead Brick_107,G4_Pb,label,granite gray
+149,F10256760--_1-248 Lead Brick_108,G4_Pb,label,granite gray
+150,F10256760--_1-248 Lead Brick_109,G4_Pb,label,granite gray
+151,F10257621--_1-Cu Bottom Cut_001,CollCu,label,medium maroon
+152,F10257621--_1-Cu Bottom Cut_002,CollCu,label,medium maroon
+153,F10256760--_1-248 Lead Brick_110,G4_Pb,label,granite gray
+154,F10256760--_1-248 Lead Brick_111,G4_Pb,label,granite gray
+155,F10256760--_1-248 Lead Brick_112,G4_Pb,label,granite gray
+156,F10256933--_1-Middle Back Cu 6in_001,CollCu,label,medium maroon
+157,F10264704--_1-LaBr Cu_001,CollCu,design,medium steel
+158,F10259124--_1-Top Slated Lead_001,G4_Pb,label,granite gray
+159,F10257675--_1-Cu Mid Left Wall_001,CollCu,label,medium maroon
+160,F10256760--_1-248 Lead Brick_113,G4_Pb,label,granite gray
+161,F10257576--_1-Angled Lead 6in_001,G4_Pb,label,medium steel
+162,F10257580--_1-Lead Middle Hole Cut_001,G4_Pb,label,granite gray
+163,F10268471--_1-Small SSC R_001,MildSteel,colour,silver gray
+164,F10268472--_1-Small SSC Right_001,MildSteel,colour,silver gray
+165,F10257581--_1-Lead Middle Cut_001,G4_Pb,label,granite gray
+166,F10256760--_1-248 Lead Brick_114,G4_Pb,label,granite gray
+167,F10256760--_1-248 Lead Brick_115,G4_Pb,label,granite gray
+168,F10268474--_1-Small SSC Base_001,MildSteel,colour,silver gray
+169,F10256760--_1-248 Lead Brick_116,G4_Pb,label,granite gray
+170,F10268496--_1-Small SSC Bot_001,MildSteel,colour,silver gray
+171,F10256760--_1-248 Lead Brick_117,G4_Pb,label,granite gray
+172,F10256760--_1-248 Lead Brick_118,G4_Pb,label,granite gray
+173,F10268476--_1-Small SSC Top_001,MildSteel,design,medium steel
+174,F10256760--_1-248 Lead Brick_119,G4_Pb,label,granite gray
+175,F10257166--_1-LaBr Lead Hole_001,G4_Pb,label,granite gray
+176,F10256760--_1-248 Lead Brick_120,G4_Pb,label,granite gray
+177,F10257043--_1-2416 Lead Brick_015,G4_Pb,label,granite gray
+178,F10257171--_1-Middle Slanted Cu 6in_001,CollCu,label,medium maroon
+179,F10256931--_1-Middle Right Cu 6in_001,CollCu,label,medium maroon
+180,F10256932--_1-Middle Back Cu 6in_001,CollCu,label,medium maroon
+181,F10256760--_1-248 Lead Brick_121,G4_Pb,label,granite gray
+182,F10258758--_1-Poly Top S sq walls_001,BP,label+rule,medium steel
+183,F10258758--_1-Poly Top S sq walls_002,BP,label+rule,medium steel
+184,F10256760--_1-248 Lead Brick_122,G4_Pb,label,granite gray
+185,F10256760--_1-248 Lead Brick_123,G4_Pb,label,granite gray
+186,F10256760--_1-248 Lead Brick_124,G4_Pb,label,granite gray
+187,F10256760--_1-248 Lead Brick_125,G4_Pb,label,granite gray
+188,F10258954--_1-Steel SCC Blocks_002,Al6061,design,medium steel
+189,F10258954--_1-Steel SCC Blocks_003,Al6061,design,medium steel
+190,F10258954--_1-Steel SCC Blocks_004,Al6061,design,medium steel
+191,F10256760--_1-248 Lead Brick_126,G4_Pb,label,granite gray
+192,F10256760--_1-248 Lead Brick_127,G4_Pb,label,granite gray
+193,F10257043--_1-2416 Lead Brick_016,G4_Pb,label,granite gray
+194,F10257043--_1-2416 Lead Brick_017,G4_Pb,label,granite gray
+195,F10257043--_1-2416 Lead Brick_018,G4_Pb,label,granite gray
+196,F10256760--_1-248 Lead Brick_128,G4_Pb,label,granite gray
+197,F10256760--_1-248 Lead Brick_129,G4_Pb,label,granite gray
+198,F10256760--_1-248 Lead Brick_130,G4_Pb,label,granite gray
+199,F10256760--_1-248 Lead Brick_131,G4_Pb,label,granite gray
+200,F10257204--_1-SSC Hole Lead R_001,G4_Pb,label,granite gray
+201,F10256760--_1-248 Lead Brick_132,G4_Pb,label,granite gray
+202,F10256760--_1-248 Lead Brick_133,G4_Pb,label,granite gray
+203,F10257043--_1-2416 Lead Brick_019,G4_Pb,label,granite gray
+204,F10256760--_1-248 Lead Brick_134,G4_Pb,label,granite gray
+205,F10256760--_1-248 Lead Brick_135,G4_Pb,label,granite gray
+206,F10258513--_1-Front Side Small Poly_001,BP,label+rule,medium steel
+207,F10256760--_1-248 Lead Brick_136,G4_Pb,label,granite gray
+208,F10257043--_1-2416 Lead Brick_020,G4_Pb,label,granite gray
+209,F10256760--_1-248 Lead Brick_137,G4_Pb,label,granite gray
+210,F10258291--_1-Right Poly Longwall_003,BP,label+rule,strong ice
+211,F10256760--_1-248 Lead Brick_138,G4_Pb,label,granite gray
+212,F10256760--_1-248 Lead Brick_139,G4_Pb,label,granite gray
+213,F10256760--_1-248 Lead Brick_140,G4_Pb,label,granite gray
+214,F10256760--_1-248 Lead Brick_141,G4_Pb,label,granite gray
+215,F10257788--_1-Cu Insert Front_001,CollCu,label,medium steel
+216,F10256760--_1-248 Lead Brick_142,G4_Pb,label,granite gray
+217,F10256760--_1-248 Lead Brick_143,G4_Pb,label,granite gray
+218,F10256760--_1-248 Lead Brick_144,G4_Pb,label,granite gray
+219,F10256760--_1-248 Lead Brick_145,G4_Pb,label,granite gray
+220,F10256945--_1-Cu Front Col 6in_001,CollCu,label,medium maroon
+221,F10256760--_1-248 Lead Brick_146,G4_Pb,label,granite gray
+222,F10257204--_1-SSC Hole Lead R_002,G4_Pb,label,granite gray
+223,F10268774--_1-Shelf Changed_001,Al6061,design,medium steel

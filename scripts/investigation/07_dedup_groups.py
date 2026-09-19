@@ -47,7 +47,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 OUTDIR = os.path.join(ROOT, "output")
 SIMPLE = os.path.join(ROOT, "STM_STP_files",
-                      "F10269585--_1-G4 Shield House_2.stp")
+                      "F10269585_G4_Shield_House_3.stp")
 
 sh = Part.read(SIMPLE)
 

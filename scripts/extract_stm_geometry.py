@@ -7,7 +7,7 @@ Run with FreeCAD's bundled interpreter (FreeCAD must be imported before Part):
     "C:/Program Files/FreeCAD 1.1/bin/python.exe" scripts/extract_stm_geometry.py
 
 Inputs
-    STM_STP_files/F10269585--_1-G4 Shield House_2.stp   (224 solids)
+    STM_STP_files/F10269585_G4_Shield_House_3.stp   (224 solids)
     STM_STP_files/F10258491--_1-Shield House Square.stp          (390 solids)
 
 Outputs (output/)
@@ -105,7 +105,7 @@ ROOT = os.path.dirname(HERE)
 OUTDIR = os.path.join(ROOT, "output")
 
 SIMPLE = os.path.join(ROOT, "STM_STP_files",
-                      "F10269585--_1-G4 Shield House_2.stp")
+                      "F10269585_G4_Shield_House_3.stp")
 FULL = os.path.join(ROOT, "STM_STP_files",
                     "F10258491--_1-Shield House Square.stp")
 
@@ -1125,6 +1125,60 @@ def classify(solid):
     return kind, params
 
 
+# Shape identity carried over from iteration 2, when one is available.
+#
+# Iteration 3 shrank most parts by tenths of a millimetre -- within
+# manufacturing tolerance, but enough that shape_key() no longer merges
+# nominally identical blocks: the 2x4x8 lead brick split into 28 "shapes" of
+# 203.2 x 101.6 x 50.573 / 50.584 / 50.657 / 50.767 ... and the model went from
+# 46 shapes to 86. Solid ids are stable between iterations, so the honest fix
+# is to take IDENTITY from v2 and GEOMETRY from v3 rather than invent a looser
+# rounding that would merge genuinely different parts elsewhere.
+V2_MAP_PATH = os.path.join(OUTDIR, "v2_shape_map.json")
+
+
+def _load_v2_map():
+    try:
+        with open(V2_MAP_PATH) as fh:
+            return json.load(fh)
+    except (IOError, OSError, ValueError):
+        return {}
+
+
+V2_MAP = _load_v2_map()
+
+
+def _load_solid_materials():
+    """solid_id -> Geant4 material, from the material pass.
+
+    Needed for naming: a label that names no material ("Shelf Changed") or
+    starts with a digit ("248 Lead Brick") gets the material word prepended,
+    and the material is not derivable from the CAD colour -- "medium steel"
+    alone covers Al6061, BP, Polyethylene and MildSteel.
+    """
+    try:
+        with open(os.path.join(OUTDIR, "solid_materials.json")) as fh:
+            return json.load(fh)
+    except (IOError, OSError, ValueError):
+        return {}
+
+
+SOLID_MATERIALS = _load_solid_materials()
+
+
+def v2_key(solid_id):
+    """('v2', shape) for a solid iteration 2 already grouped, else None."""
+    row = V2_MAP.get(str(solid_id))
+    if not row:
+        return None
+    return ("v2", row["v2_shape"])
+
+
+def v2_dims(solid_id):
+    """Iteration 2's dimensions for this solid's shape, or None."""
+    return V2_MAP.get(str(solid_id))
+
+
 def shape_key(solid, kind, p):
     """Identity of a block, independent of where it sits or how it is turned.
 
@@ -1406,16 +1460,129 @@ def colour_from_lut(dims, lut):
 
 # --------------------------------------------------------------------- name
 
+# The CAD label is the best name we have, so names are built from it rather
+# than from the colour. Two fixes are applied on the way:
+#
+#   * a label naming the wrong material. The colour-derived names were worse
+#     than unhelpful -- shape 5 was "SteelBrick1x6x24PV" for a BP poly edge,
+#     shape 19 "SteelRwall19PV" for lead, shape 25 "SteelTube25PV" for copper.
+#   * "Poly Lead Block" reads as a lead part. It is polyethylene sitting in the
+#     lead, so it is renamed to avoid exactly that confusion.
+# The description part of the name, keyed by CAD label. Everything here is a
+# deliberate edit to what the label says -- fixing a typo, dropping a word that
+# carries no meaning, or naming the part for what it is. Labels not listed are
+# used as written.
+LABEL_RENAME = {
+    # Poly, but sitting in the lead: the label reads as a lead part.
+    "Poly Lead Block": "Insert Block",
+    "Poly Block Reduced": "Block",
+    # "SCC" is a typo for SSC, and these are the steel blocks around it.
+    "Steel SCC Blocks": "SSC Blocks",
+    # "S sq" means nothing in a volume name.
+    "Poly Top S sq walls": "Top Square Wall",
+    "Top Al sq walls": "Top Square Wall",
+    # The two 2-inch pipes, named by what distinguishes them: length.
+    "LaBr Cu": "Long Pipe",
+    "Cu Insert Front": "Short Pipe",
+    # "Changed" and "Machining" describe a CAD operation, not a part.
+    "Shelf Changed": "Shelf",
+    "BASE PLATE MACHINING": "Base Plate",
+    # Size codes read better spelled out: 2x4x8 inch, not 248.
+    "248 Lead Brick": "Brick 2x4x8",
+    "2416 Lead Brick": "Brick 2x4x16",
+    # Dropping the redundant material word would leave these with no noun at
+    # all -- "SSC Poly" becomes bare "SSC", "Front Side Small Poly" becomes
+    # "Front Side Small". Give them one.
+    "SSC Poly": "SSC Panel",
+    "Front Side Small Poly": "Front Side Small Panel",
+    # The CAD labels use both "Bot" and "Bottom"; spell it out everywhere.
+    # "Cu Bottom Cut" needs no entry -- it already says Bottom, and the "Cu"
+    # is dropped as redundant with the material prefix.
+    "Small SSC Bot": "Small SSC Bottom",
+    "Bot Square Poly": "Bottom Square",
+}
+
+# Words that merely repeat the material prefix, dropped so the name does not
+# read "BPPolyFrontOuter". Matched case-insensitively as whole words.
+_REDUNDANT = ("lead", "poly", "cu", "al", "aluminum", "steel", "tungsten",
+              "bp")
+
+# Material words, for labels that carry none ("Shelf Changed", "Small SSC Top")
+# and for labels that start with a digit ("248 Lead Brick"), which cannot lead
+# a C++ identifier.
+MATERIAL_NAME = {
+    "G4_Pb": "Lead",
+    "BP": "BP",                 # borated polyethylene -- NOT "Poly"
+    "Polyethylene": "Poly",     # the two genuinely plain-poly parts
+    "CollCu": "Cu",
+    "Al6061": "Aluminum",
+    "MildSteel": "Steel",
+    "G4_W_Hayman": "Tungsten",
+}
+
+def label_name(raw, material):
+    """Volume name from the CAD label: 'F10256760--_1-248 Lead Brick_001'.
+
+    One scheme, applied to every part: {Material}{Description}PV, material
+    always first. The first pass took whatever order the label happened to use
+    and was incoherent as a result -- PolyFrontOuterPV, SmallTriangleLeadPV and
+    TopAlSqWallsPV put the material at the front, the end and the middle.
+
+    The material comes from the part label (see solid_materials.json), so BP
+    parts say BP rather than Poly: of the 22 poly parts only two are plain
+    polyethylene, and calling the other twenty "Poly" hid that.
+
+    A word in the description that merely repeats the material is dropped, so
+    "Poly Front Outer" in BP becomes BPFrontOuter, not BPPolyFrontOuter.
+
+    No shape id is appended: most labels are already unique, and a numeric
+    suffix runs into any trailing size code. The caller disambiguates the few
+    labels genuinely shared by two shapes.
+
+    Returns None when there is no usable label, so the caller can fall back.
+    """
+    if not raw:
+        return None
+    s = re.sub(r"^F\d+-*", "", raw)          # part number
+    s = re.sub(r"^_\d+-", "", s)             # revision prefix
+    s = re.sub(r"_\d+$", "", s)              # instance suffix
+    s = LABEL_RENAME.get(s.strip(), s.strip())
+    if not s:
+        return None
+
+    word = MATERIAL_NAME.get(material, "")
+
+    # Title-case each word, so an all-caps label ("BASE PLATE MACHINING") does
+    # not survive as an unreadable run of capitals. Words that are already
+    # mixed case are left alone -- "SSC", "LaBr" and "Cu" are meaningful as
+    # written and lower-casing them would lose that.
+    parts = []
+    for w in re.split(r"[^A-Za-z0-9]+", s):
+        if not w:
+            continue
+        parts.append(w.capitalize() if w.isupper() and len(w) > 3 else
+                     w[:1].upper() + w[1:])
+
+    # Drop words that only restate the material, then put the material first.
+    # A size code keeps its place at the end of the description ("2x4x8"),
+    # which is also what keeps the name a valid identifier.
+    parts = [w for w in parts if w.lower() not in _REDUNDANT]
+    if word:
+        parts.insert(0, word)
+
+    return "".join(parts) + "PV"
+
+
 def suggest_name(kind, p, colour, seq, count, spread):
     """A starting point for the volume name, following the Offline scheme.
 
-    Offline names shielding as {Material}{Side}wall{N}PV -- CopperLwallPV,
-    LeadTwall1PV, BPRwall2PV. That only reads well for a panel that sits on one
-    side of the house. Most of this model is stacked brick: 146 copies of one
-    2x4x8 inch block scattered over more than a metre in every direction, where
-    a side label would be actively misleading. So repeated, widely spread
-    shapes are named for what they are, and only shapes that stay put get a
-    side. Edit these; they are a starting point, not an authority.
+    Used only when the solid carries no CAD label. Offline names shielding as
+    {Material}{Side}wall{N}PV -- CopperLwallPV, LeadTwall1PV, BPRwall2PV. That
+    only reads well for a panel that sits on one side of the house. Most of
+    this model is stacked brick: 146 copies of one 2x4x8 inch block scattered
+    over more than a metre in every direction, where a side label would be
+    actively misleading. So repeated, widely spread shapes are named for what
+    they are, and only shapes that stay put get a side.
     """
     word = MATERIAL_WORD.get(colour, "Block")
     x, y, z = p["pos"]
@@ -1498,7 +1665,9 @@ def main():
     for i, s in enumerate(solids):
         kind, p = classify(s)
         kinds[kind] += 1
-        key = shape_key(s, kind, p)
+        key = v2_key(i)
+        if key is None:
+            key = shape_key(s, kind, p)
         if key not in groups:
             groups[key] = {"kind": kind, "p": p, "members": [],
                            "oblique": oblique(s)}
@@ -1510,11 +1679,62 @@ def main():
     # One row per distinct shape: the block definitions a constructSTM.cc
     # would declare once and place repeatedly.
     order = {k: n for n, k in enumerate(groups)}
+
+    # Name every shape first, so collisions can be seen and broken.
+    #
+    # Four labels are each used by two DIFFERENT shapes -- two "SSC Poly"
+    # panels of different size, two "Cu Bottom Cut", and so on. Appending the
+    # shape id to every name to guard against that made the other 38 worse
+    # ("LeadBrick2416" + "0" reads as "LeadBrick24160"), so the suffix goes
+    # only where it is earned, and as a letter to keep it out of the digits.
+    shape_names = {}
+    for key, g in groups.items():
+        first = g["members"][0]
+        nm = label_name(labels.get(first), SOLID_MATERIALS.get(str(first)))
+        if not nm:
+            pts = [placements[i][2]["pos"] for i in g["members"]]
+            spread = max(max(q[a] for q in pts) - min(q[a] for q in pts)
+                         for a in range(3)) if len(pts) > 1 else 0.0
+            nm = suggest_name(g["kind"], g["p"], per_solid.get(first, ""),
+                              order[key], len(g["members"]), spread)
+        shape_names[key] = nm
+    clash = collections.Counter(shape_names.values())
+    seen = collections.Counter()
+    for key in list(shape_names):
+        nm = shape_names[key]
+        if clash[nm] > 1:
+            suffix = chr(ord("A") + seen[nm])
+            seen[nm] += 1
+            shape_names[key] = "%s%sPV" % (nm[:-2], suffix)
+
     shape_rows = []
     for key, g in groups.items():
         n = order[key]
         p = g["p"]
         dims = (p.get("dx", 0.0), p.get("dy", 0.0), p.get("dz", 0.0))
+
+        # Iteration 2's dimensions, for a group that came from the v2 map.
+        #
+        # Identity from v2, geometry from v3, SIZE from v2: iteration 3 shrank
+        # most parts within manufacturing tolerance, so its measured sizes are
+        # 24 subtly different lead bricks where there is physically one. Taking
+        # the size from v2 restores the single definition.
+        #
+        # Only dx/dy/dz are overridden. The prism and tube fields are left on
+        # v3 deliberately: the cap outline written to stm_prisms.csv comes from
+        # the v3 solid, so a v2 cap_area/sweep_len here would contradict the
+        # outline file. Solid 220 is the case that matters -- v2 identity, but
+        # v3's 8-face geometry.
+        v2 = None
+        for _m in g["members"]:
+            v2 = v2_dims(_m)
+            if v2:
+                break
+        if v2 and v2.get("dx") not in (None, ""):
+            try:
+                dims = (float(v2["dx"]), float(v2["dy"]), float(v2["dz"]))
+            except (TypeError, ValueError):
+                pass
 
         # Colour of the group: the members agree, so take the commonest and
         # fall back to the dimension lookup only if none of them matched.
@@ -1526,13 +1746,10 @@ def main():
         else:
             colour, how = colour_from_lut(dims, lut)
 
-        # How far apart the copies sit: a brick stacked all over the house
-        # should not be named after one wall.
-        pts = [placements[i][2]["pos"] for i in g["members"]]
-        spread = max(max(q[a] for q in pts) - min(q[a] for q in pts)
-                     for a in range(3)) if len(pts) > 1 else 0.0
-
-        name = suggest_name(g["kind"], p, colour, n, len(g["members"]), spread)
+        # Name from the CAD label when there is one: it says what the part
+        # actually is, where the colour-derived fallback could only guess from
+        # size and position. suggest_name() stays for solids with no label.
+        name = shape_names[key]
 
         # dx/dy/dz are the SOLID's dimensions for a box, a bored box or a tube.
         # For a prism they would be the bounding envelope, which is not the

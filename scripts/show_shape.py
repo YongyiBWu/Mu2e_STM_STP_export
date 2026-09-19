@@ -41,6 +41,7 @@ Everything else is honest
 import argparse
 import collections
 import csv
+import json
 import math
 import os
 import sys
@@ -95,6 +96,52 @@ def prism_geometry(rows):
         "u": (num(r0, "u_x", 1.0), num(r0, "u_y", 0.0), num(r0, "u_z", 0.0)),
         "w": (num(r0, "w_x", 0.0), num(r0, "w_y", 1.0), num(r0, "w_z", 0.0)),
     }
+
+
+def _load_materials():
+    """solid_id -> Geant4 material name, from output/solid_materials.csv.
+
+    Written by the material pass: labels in the iteration-3 STEP name the
+    material directly ("248 Lead Brick", "Top Al sq walls"), with the CAD
+    colour only as a fallback. That replaces the old colour guess, which could
+    not be trusted -- one colour, "medium steel", covers Al6061, BP,
+    Polyethylene and MildSteel.
+
+    Optional: absent before the material pass has run, in which case callers
+    fall back to the colour name.
+    """
+    path = os.path.join(OUTDIR, "solid_materials.json")
+    try:
+        with open(path) as fh:
+            return json.load(fh)
+    except (IOError, OSError, ValueError):
+        return {}
+
+
+MATERIALS = _load_materials()
+_SHAPE_MATERIAL = {}
+
+
+def material_of(shape):
+    """The shape's real material, falling back to the CAD colour name.
+
+    Materials are recorded per SOLID, so this joins through any one placement
+    of the shape. Every copy of a shape agrees (checked: 0 shapes span two
+    materials), so the first is representative.
+    """
+    sid = str(shape.get("shape_id"))
+    if sid in _SHAPE_MATERIAL:
+        return _SHAPE_MATERIAL[sid]
+    out = None
+    if MATERIALS:
+        for p in load("stm_placements.csv", required=False):
+            if p.get("shape_id") == sid:
+                out = MATERIALS.get(p.get("solid_id"))
+                if out:
+                    break
+    out = out or (shape.get("material") or "?")
+    _SHAPE_MATERIAL[sid] = out
+    return out
 
 
 def num(row, key, default=None):
@@ -199,13 +246,17 @@ def describe(shape, bores, placements, geom=None):
         iz = num(shape, "in_z")
         if None not in (ix, iy, iz):
             lines.append("            %.3f x %.3f x %.3f in" % (ix, iy, iz))
-    lines.append("  material  %s" % (shape.get("material") or "?"))
-    hint = shape.get("material_hint")
-    if hint:
-        lines.append("  hint      %s   (a guess, not authoritative)" % hint)
+    lines.append("  material  %s" % material_of(shape))
+    # The CAD colour is kept as provenance, not as the answer. It is not a
+    # material and in several cases is actively misleading: "medium steel"
+    # covers Al6061, BP, Polyethylene and MildSteel, and "medium ice" covers BP.
+    colour = shape.get("material")
+    if colour:
+        lines.append("  CAD colour %s   (provenance only, not a material)"
+                     % colour)
     src = shape.get("material_src")
     if src:
-        lines.append("  from      %s" % src)
+        lines.append("  colour from %s" % src)
 
     if kind == "TUBE":
         lines.append("  bore      rmin %.3f  rmax %.3f mm"
@@ -478,12 +529,11 @@ def draw(shape, bores, placements, save, solid_row=None, geom=None):
 
     title = "shape %s  %s  %s" % (shape["shape_id"], kind,
                                   shape.get("name") or "")
-    sub = "%.1f x %.1f x %.1f mm   %s" % (dx, dy, dz,
-                                          shape.get("material") or "?")
+    mat = material_of(shape)
+    sub = "%.1f x %.1f x %.1f mm   %s" % (dx, dy, dz, mat)
     if kind == "TUBE":
         sub = "rmin %.2f  rmax %.2f  length %.1f mm   %s" % (
-            num(shape, "rmin", 0.0), num(shape, "rmax", 0.0), dz,
-            shape.get("material") or "?")
+            num(shape, "rmin", 0.0), num(shape, "rmax", 0.0), dz, mat)
     if solid_row is not None:
         sub += "\nsolid %s at (%.1f, %.1f, %.1f) mm" % (
             solid_row["solid_id"], num(solid_row, "x", 0.0),
@@ -492,8 +542,7 @@ def draw(shape, bores, placements, save, solid_row=None, geom=None):
         sub += "\nENVELOPE ONLY -- real solid is smaller"
     elif geom is not None:
         sub = ("%d-sided cap, area %.0f mm^2, swept %.1f mm   %s"
-               % (len(geom["outline"]), geom["area"], geom["len"],
-                  shape.get("material") or "?"))
+               % (len(geom["outline"]), geom["area"], geom["len"], mat))
         sub += "\nexact extrusion from stm_prisms.csv"
     if (shape.get("rotY45") or "").strip() and geom is None:
         sub += "\nrotY45: drawn in its own frame, orientation not shown"
@@ -754,7 +803,7 @@ def list_shapes(shapes):
             size = "(no dimensions)"
         print("%-4s %-9s %-5s %-26s %-14s %s%s"
               % (s["shape_id"], s["type"], s["count"],
-                 (s.get("name") or "")[:26], (s.get("material") or "?")[:14],
+                 (s.get("name") or "")[:26], material_of(s)[:14],
                  size,
                  "   rotY45" if (s.get("rotY45") or "").strip() else ""))
 

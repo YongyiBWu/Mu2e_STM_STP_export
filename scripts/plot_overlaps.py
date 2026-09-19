@@ -53,7 +53,7 @@ ROOT = os.path.dirname(HERE)
 OUTDIR = os.path.join(ROOT, "output")
 PLOTDIR = os.path.join(OUTDIR, "overlap")
 STP = os.path.join(ROOT, "STM_STP_files",
-                   "F10269585--_1-G4 Shield House_2.stp")
+                   "F10269585_G4_Shield_House_3.stp")
 
 sys.path.insert(0, HERE)
 import extract_stm_geometry as E          # noqa: E402  (transform, TILT_DEG)
